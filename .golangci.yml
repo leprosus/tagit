@@ -1,0 +1,109 @@
+version: "2"
+run:
+  concurrency: 4
+  go: "1.24"
+  modules-download-mode: mod
+  issues-exit-code: 1
+  tests: true
+  allow-parallel-runners: true
+linters:
+  default: all
+  disable:
+    - copyloopvar
+    - exhaustruct
+    - intrange
+    - musttag
+    - nonamedreturns
+    - tagliatelle
+    - wrapcheck
+    - containedctx
+    - ireturn
+    - gomodguard
+    - wsl
+    - exhaustruct_v5
+    - goconst
+  settings:
+    cyclop:
+      max-complexity: 10
+      package-average: 5
+    depguard:
+      rules:
+        main:
+          list-mode: lax
+          files:
+            - $all
+          allow:
+            - $gostd
+          deny:
+            - pkg: io/ioutil
+              desc: 'replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil'
+    funlen:
+      lines: 100
+      statements: 50
+      ignore-comments: true
+    gocognit:
+      min-complexity: 10
+    gosec:
+      excludes:
+        - G401
+        - G505
+        - G306
+        - G115
+    lll:
+      line-length: 140
+    misspell:
+      ignore-rules:
+        - sub_payed
+    revive:
+      rules:
+        - name: dot-imports
+          disabled: true
+    staticcheck:
+      checks:
+        - ST1003
+        - ST1005
+        - ST1006
+        - ST1008
+        - ST1011
+        - ST1012
+        - ST1013
+        - ST1015
+        - ST1016
+        - ST1017
+        - ST1018
+        - ST1019
+        - ST1020
+        - ST1021
+        - ST1022
+        - ST1023
+    varnamelen:
+      ignore-names:
+        - i
+        - ok
+        - bs
+        - err
+        - e
+        - tx
+        - id
+        - wg
+        - db
+        - fn
+        - in
+        - tc
+        - t
+    whitespace:
+      multi-if: true
+      multi-func: false
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
