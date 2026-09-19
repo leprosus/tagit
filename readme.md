@@ -2,6 +2,19 @@
 
 `tagit` creates and increments semantic git tags in the current repository.
 
+## Installation
+
+Install with Homebrew:
+
+```sh
+brew tap leprosus/tap
+brew trust leprosus/tap
+brew install tagit
+```
+
+`brew trust` explicitly permits Homebrew to execute formulas from the
+third-party `leprosus/tap` repository.
+
 ## Usage
 
 Build the command:
