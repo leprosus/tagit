@@ -23,11 +23,11 @@ func printHelp(stdout io.Writer) (err error) {
 func runApplication(ctx context.Context, argumentList []string, dirPath string, stdout io.Writer) (err error) {
 	curGit := newGit(dirPath)
 
-	if len(argumentList) == 0 {
-		if !curGit.isRepository(ctx) {
-			return printHelp(stdout)
-		}
+	if !curGit.isRepository(ctx) {
+		return printHelp(stdout)
+	}
 
+	if len(argumentList) == 0 {
 		return increaseTag(ctx, curGit, patch, stdout)
 	}
 

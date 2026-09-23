@@ -86,16 +86,26 @@ func TestRunApplicationCreatesInitialTagWhenOnlyNonSemanticTagsExist(t *testing.
 func TestRunApplicationShowsHelpOutsideRepository(t *testing.T) {
 	t.Parallel()
 
-	var output bytes.Buffer
-
-	err := runApplication(t.Context(), nil, t.TempDir(), &output)
-	if err != nil {
-		t.Fatal(err)
+	testCaseList := [][]string{
+		nil,
+		{"patch"},
+		{"minor"},
+		{"major"},
+		{"list", "10"},
+		{"unknown"},
 	}
+	for _, argumentList := range testCaseList {
+		var output bytes.Buffer
 
-	got := output.String()
-	if got != helpMessage {
-		t.Fatalf("printed %q, want %q", got, helpMessage)
+		err := runApplication(t.Context(), argumentList, t.TempDir(), &output)
+		if err != nil {
+			t.Fatalf("runApplication(%q): %v", argumentList, err)
+		}
+
+		got := output.String()
+		if got != helpMessage {
+			t.Errorf("runApplication(%q) printed %q, want %q", argumentList, got, helpMessage)
+		}
 	}
 }
 
@@ -151,19 +161,6 @@ func TestRunApplicationReturnsUsageError(t *testing.T) {
 
 	var target *usageError
 	if !errors.As(err, &target) || !strings.Contains(err.Error(), "usage:") {
-		t.Fatalf("error = %v", err)
-	}
-}
-
-func TestRunApplicationReturnsGitCommandError(t *testing.T) {
-	t.Parallel()
-
-	var output bytes.Buffer
-
-	err := runApplication(t.Context(), []string{"patch"}, t.TempDir(), &output)
-
-	var target *gitCommandError
-	if !errors.As(err, &target) || !strings.Contains(err.Error(), "git tag --list") {
 		t.Fatalf("error = %v", err)
 	}
 }
