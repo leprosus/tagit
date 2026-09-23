@@ -83,6 +83,22 @@ func TestRunApplicationCreatesInitialTagWhenOnlyNonSemanticTagsExist(t *testing.
 	}
 }
 
+func TestRunApplicationShowsHelpOutsideRepository(t *testing.T) {
+	t.Parallel()
+
+	var output bytes.Buffer
+
+	err := runApplication(nil, t.TempDir(), &output)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := output.String()
+	if got != helpMessage {
+		t.Fatalf("printed %q, want %q", got, helpMessage)
+	}
+}
+
 func TestRunApplicationErrors(t *testing.T) {
 	t.Parallel()
 

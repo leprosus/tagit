@@ -44,6 +44,14 @@ func (g git) createTag(ctx context.Context, tag string) (err error) {
 	return err
 }
 
+func (g git) isRepository(ctx context.Context) bool {
+	var err error
+
+	_, err = g.runCommand(ctx, "rev-parse", "--git-dir")
+
+	return err == nil
+}
+
 func (g git) runCommand(ctx context.Context, argumentList ...string) (output string, err error) {
 	command := makeCommand(ctx, argumentList...)
 	command.Dir = g.dirPath

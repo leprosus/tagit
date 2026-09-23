@@ -7,6 +7,17 @@ import (
 	"os"
 )
 
+const helpMessage = `Usage: tagit [patch|minor|major]
+
+Creates or increments a semantic Git tag in the current repository.
+`
+
+func printHelp(stdout io.Writer) (err error) {
+	_, err = fmt.Fprint(stdout, helpMessage)
+
+	return err
+}
+
 func runApplication(argumentList []string, dirPath string, stdout io.Writer) (err error) {
 	incrementKind := patch
 
@@ -25,9 +36,14 @@ func runApplication(argumentList []string, dirPath string, stdout io.Writer) (er
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	curGit := newGit(dirPath)
+	if len(argumentList) == 0 && !curGit.isRepository(ctx) {
+		return printHelp(stdout)
+	}
+
 	var tag string
 
-	tag, err = newGit(dirPath).increaseTag(ctx, incrementKind)
+	tag, err = curGit.increaseTag(ctx, incrementKind)
 	if err != nil {
 		return err
 	}

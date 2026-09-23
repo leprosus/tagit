@@ -32,6 +32,9 @@ tagit minor    # v0.0.1 -> v0.1.0
 tagit major    # v0.0.1 -> v1.0.1
 ```
 
+When invoked without arguments outside a Git repository, `tagit` prints its
+usage help.
+
 The command considers only stable tags in the exact `v{MAJOR}.{MINOR}.{PATCH}` form,
 chooses the greatest version, creates the next tag locally, and prints it. It
 requires the Git command-line client and does not push tags to a remote.
