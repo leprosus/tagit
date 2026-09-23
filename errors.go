@@ -17,6 +17,18 @@ func (e *usageError) Error() (result string) {
 	return result
 }
 
+type invalidListLimitError struct {
+	value string
+}
+
+func newInvalidListLimitError(value string) (result *invalidListLimitError) {
+	return &invalidListLimitError{value: value}
+}
+
+func (e *invalidListLimitError) Error() (result string) {
+	return fmt.Sprintf("invalid list limit %q: must be a positive integer", e.value)
+}
+
 type unknownVersionIncrementError struct {
 	kind kind
 }

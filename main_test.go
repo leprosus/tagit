@@ -31,7 +31,7 @@ func TestRunApplicationCreatesAndIncrementsTagList(t *testing.T) {
 			argumentList = []string{test.argument}
 		}
 
-		err := runApplication(argumentList, directory, &output)
+		err := runApplication(t.Context(), argumentList, directory, &output)
 		if err != nil {
 			t.Fatalf("runApplication(%q): %v", test.argument, err)
 		}
@@ -53,7 +53,7 @@ func TestRunApplicationUsesHighestSemanticVersionAndIgnoresOtherTagList(t *testi
 
 	var output bytes.Buffer
 
-	err := runApplication([]string{"patch"}, directory, &output)
+	err := runApplication(t.Context(), []string{"patch"}, directory, &output)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestRunApplicationCreatesInitialTagWhenOnlyNonSemanticTagsExist(t *testing.
 
 	var output bytes.Buffer
 
-	err := runApplication([]string{"major"}, directory, &output)
+	err := runApplication(t.Context(), []string{"major"}, directory, &output)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func TestRunApplicationShowsHelpOutsideRepository(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err := runApplication(nil, t.TempDir(), &output)
+	err := runApplication(t.Context(), nil, t.TempDir(), &output)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,45 +99,89 @@ func TestRunApplicationShowsHelpOutsideRepository(t *testing.T) {
 	}
 }
 
-func TestRunApplicationErrors(t *testing.T) {
+func TestRunApplicationListsVersionTags(t *testing.T) {
 	t.Parallel()
 
-	t.Run("invalid command", func(t *testing.T) {
-		t.Parallel()
+	directory := createRepository(t)
+	for _, tag := range []string{"v1.0.0", "v0.10.0", "release", "v2.0.0", "v0.2.1", "v01.2.3"} {
+		runGitCommand(t, directory, "tag", tag)
+	}
 
+	testCaseList := []struct {
+		argumentList []string
+		want         string
+	}{
+		{[]string{"list"}, "v0.2.1\nv0.10.0\nv1.0.0\nv2.0.0\n"},
+		{[]string{"list", "2"}, "v1.0.0\nv2.0.0\n"},
+	}
+	for _, test := range testCaseList {
 		var output bytes.Buffer
 
-		err := runApplication([]string{"build"}, createRepository(t), &output)
-
-		var target *unknownVersionIncrementError
-		if !errors.As(err, &target) || !strings.Contains(err.Error(), "unknown version increment") {
-			t.Fatalf("error = %v", err)
+		err := runApplication(t.Context(), test.argumentList, directory, &output)
+		if err != nil {
+			t.Fatalf("runApplication(%q): %v", test.argumentList, err)
 		}
-	})
-	t.Run("too many arguments", func(t *testing.T) {
-		t.Parallel()
 
+		got := output.String()
+		if got != test.want {
+			t.Errorf("runApplication(%q) printed %q, want %q", test.argumentList, got, test.want)
+		}
+	}
+}
+
+func TestRunApplicationReturnsUnknownVersionIncrementError(t *testing.T) {
+	t.Parallel()
+
+	var output bytes.Buffer
+
+	err := runApplication(t.Context(), []string{"build"}, createRepository(t), &output)
+
+	var target *unknownVersionIncrementError
+	if !errors.As(err, &target) || !strings.Contains(err.Error(), "unknown version increment") {
+		t.Fatalf("error = %v", err)
+	}
+}
+
+func TestRunApplicationReturnsUsageError(t *testing.T) {
+	t.Parallel()
+
+	var output bytes.Buffer
+
+	err := runApplication(t.Context(), []string{"patch", "extra"}, createRepository(t), &output)
+
+	var target *usageError
+	if !errors.As(err, &target) || !strings.Contains(err.Error(), "usage:") {
+		t.Fatalf("error = %v", err)
+	}
+}
+
+func TestRunApplicationReturnsGitCommandError(t *testing.T) {
+	t.Parallel()
+
+	var output bytes.Buffer
+
+	err := runApplication(t.Context(), []string{"patch"}, t.TempDir(), &output)
+
+	var target *gitCommandError
+	if !errors.As(err, &target) || !strings.Contains(err.Error(), "git tag --list") {
+		t.Fatalf("error = %v", err)
+	}
+}
+
+func TestRunApplicationReturnsInvalidListLimitError(t *testing.T) {
+	t.Parallel()
+
+	testCaseList := []string{"0", "many"}
+	for _, value := range testCaseList {
 		var output bytes.Buffer
 
-		err := runApplication([]string{"patch", "extra"}, createRepository(t), &output)
+		err := runApplication(t.Context(), []string{"list", value}, createRepository(t), &output)
 
-		var target *usageError
-		if !errors.As(err, &target) || !strings.Contains(err.Error(), "usage:") {
+		var target *invalidListLimitError
+		if !errors.As(err, &target) || target.value != value {
 			t.Fatalf("error = %v", err)
 		}
-	})
-	t.Run("not a repository", func(t *testing.T) {
-		t.Parallel()
-
-		var output bytes.Buffer
-
-		err := runApplication([]string{"patch"}, t.TempDir(), &output)
-
-		var target *gitCommandError
-		if !errors.As(err, &target) || !strings.Contains(err.Error(), "git tag --list") {
-			t.Fatalf("error = %v", err)
-		}
-	})
+	}
 }
 
 func createRepository(t *testing.T) (directory string) {

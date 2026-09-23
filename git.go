@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os/exec"
+	"sort"
 	"strings"
 )
 
@@ -50,6 +51,30 @@ func (g git) isRepository(ctx context.Context) bool {
 	_, err = g.runCommand(ctx, "rev-parse", "--git-dir")
 
 	return err == nil
+}
+
+func (g git) getSortedVersionList(ctx context.Context) (versionList []version, err error) {
+	var tagList []string
+
+	tagList, err = g.getTagList(ctx)
+	if err != nil {
+		return versionList, err
+	}
+
+	for _, tag := range tagList {
+		currentVersion, isValid := parseVersion(tag)
+		if !isValid {
+			continue
+		}
+
+		versionList = append(versionList, currentVersion)
+	}
+
+	sort.Slice(versionList, func(left, right int) bool {
+		return versionList[left].Compare(versionList[right]) < 0
+	})
+
+	return versionList, err
 }
 
 func (g git) runCommand(ctx context.Context, argumentList ...string) (output string, err error) {

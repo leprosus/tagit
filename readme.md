@@ -30,6 +30,8 @@ tagit          # no semantic tags yet: creates v0.0.1; otherwise increments patc
 tagit patch    # v0.0.1 -> v0.0.2
 tagit minor    # v0.0.1 -> v0.1.0
 tagit major    # v0.0.1 -> v1.0.1
+tagit list     # lists valid SemVer tags from oldest to newest
+tagit list 10  # lists the latest 10 valid SemVer tags
 ```
 
 When invoked without arguments outside a Git repository, `tagit` prints its

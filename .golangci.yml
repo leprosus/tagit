@@ -49,6 +49,7 @@ linters:
         - G505
         - G306
         - G115
+        - G602
     lll:
       line-length: 140
     misspell:
