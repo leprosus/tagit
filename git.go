@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os/exec"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -43,6 +44,36 @@ func (g git) createTag(ctx context.Context, tag string) (err error) {
 	_, err = g.runCommand(ctx, "tag", tag)
 
 	return err
+}
+
+func (g git) deleteTag(ctx context.Context, tag string) (err error) {
+	var hasTag bool
+
+	hasTag, err = g.hasTag(ctx, tag)
+	if err != nil || !hasTag {
+		return err
+	}
+
+	_, err = g.runCommand(ctx, "tag", "--delete", tag)
+
+	return err
+}
+
+func (g git) hasTag(ctx context.Context, tag string) (result bool, err error) {
+	var tagList []string
+
+	tagList, err = g.getTagList(ctx)
+	if err != nil {
+		return result, err
+	}
+
+	if slices.Contains(tagList, tag) {
+		result = true
+
+		return result, nil
+	}
+
+	return result, nil
 }
 
 func (g git) isRepository(ctx context.Context) bool {

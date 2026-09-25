@@ -11,6 +11,7 @@ import (
 const helpMessage = `Usage: tagit [patch|minor|major]
        tagit list [limit]
        tagit set vMAJOR.MINOR.PATCH
+       tagit del vMAJOR.MINOR.PATCH
 
 Creates, increments, or lists semantic Git tags in the current repository.
 `
@@ -32,13 +33,15 @@ func runApplication(ctx context.Context, argumentList []string, dirPath string, 
 		return increaseTag(ctx, curGit, patch, stdout)
 	}
 
-	command := argumentList[0]
+	command, arg := argumentList[0], argumentList[1:]
 
 	switch command {
 	case "list":
-		return printVersionTagList(ctx, curGit, argumentList[1:], stdout)
+		return printVersionTagList(ctx, curGit, arg, stdout)
 	case "set":
-		return setVersionTag(ctx, curGit, argumentList[1:], stdout)
+		return setVersionTag(ctx, curGit, arg, stdout)
+	case "del":
+		return deleteVersionTag(ctx, curGit, arg)
 	}
 
 	if len(argumentList) > 1 {
@@ -86,6 +89,21 @@ func setVersionTag(ctx context.Context, curGit git, argumentList []string, stdou
 	}
 
 	_, err = fmt.Fprintln(stdout, argumentList[0])
+
+	return err
+}
+
+func deleteVersionTag(ctx context.Context, curGit git, argumentList []string) (err error) {
+	if len(argumentList) != 1 {
+		return newUsageError()
+	}
+
+	_, isValid := parseVersion(argumentList[0])
+	if !isValid {
+		return newUsageError()
+	}
+
+	err = curGit.deleteTag(ctx, argumentList[0])
 
 	return err
 }

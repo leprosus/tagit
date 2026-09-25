@@ -33,11 +33,13 @@ tagit major    # v0.0.1 -> v1.0.1
 tagit list     # lists valid SemVer tags from oldest to newest
 tagit list 10  # lists the latest 10 valid SemVer tags
 tagit set v1.2.3 # creates the v1.2.3 tag
+tagit del v1.2.3 # deletes the v1.2.3 tag when it exists
 ```
 
 Outside a Git repository, or with an invalid `set` version, `tagit` prints
-usage help and exits successfully. For every other error, it writes the error
-and usage help to standard error, then exits with status `1`.
+usage help and exits successfully. An invalid `del` version and every other
+error write the error and usage help to standard error, then exit with status
+`1`. Deleting a tag that does not exist completes without changes.
 
 The command considers only stable tags in the exact `v{MAJOR}.{MINOR}.{PATCH}` form,
 chooses the greatest version, creates the next tag locally, and prints it. It
