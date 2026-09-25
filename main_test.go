@@ -92,12 +92,71 @@ func TestRunApplicationShowsHelpOutsideRepository(t *testing.T) {
 		{"minor"},
 		{"major"},
 		{"list", "10"},
+		{"set", "v1.2.3"},
 		{"unknown"},
 	}
 	for _, argumentList := range testCaseList {
 		var output bytes.Buffer
 
 		err := runApplication(t.Context(), argumentList, t.TempDir(), &output)
+		if err != nil {
+			t.Fatalf("runApplication(%q): %v", argumentList, err)
+		}
+
+		got := output.String()
+		if got != helpMessage {
+			t.Errorf("runApplication(%q) printed %q, want %q", argumentList, got, helpMessage)
+		}
+	}
+}
+
+func TestRunApplicationSetsVersionTag(t *testing.T) {
+	t.Parallel()
+
+	directory := createRepository(t)
+
+	var output bytes.Buffer
+
+	err := runApplication(t.Context(), []string{"set", "v1.2.3"}, directory, &output)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := output.String()
+	if got != "v1.2.3\n" {
+		t.Fatalf("printed %q, want v1.2.3\\n", got)
+	}
+
+	output.Reset()
+
+	err = runApplication(t.Context(), []string{"list"}, directory, &output)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got = output.String()
+	if got != "v1.2.3\n" {
+		t.Fatalf("list printed %q, want v1.2.3\\n", got)
+	}
+}
+
+func TestRunApplicationShowsHelpForInvalidSetVersionTag(t *testing.T) {
+	t.Parallel()
+
+	directory := createRepository(t)
+
+	testCaseList := [][]string{
+		{"set"},
+		{"set", "1.2.3"},
+		{"set", "v1.2"},
+		{"set", "v01.2.3"},
+		{"set", "v1.2.3-beta"},
+		{"set", "v1.2.3", "extra"},
+	}
+	for _, argumentList := range testCaseList {
+		var output bytes.Buffer
+
+		err := runApplication(t.Context(), argumentList, directory, &output)
 		if err != nil {
 			t.Fatalf("runApplication(%q): %v", argumentList, err)
 		}
@@ -178,6 +237,34 @@ func TestRunApplicationReturnsInvalidListLimitError(t *testing.T) {
 		if !errors.As(err, &target) || target.value != value {
 			t.Fatalf("error = %v", err)
 		}
+	}
+}
+
+func TestRunCommandReturnsErrorExitCodeAndPrintsHelp(t *testing.T) {
+	t.Parallel()
+
+	var (
+		stdout bytes.Buffer
+		stderr bytes.Buffer
+	)
+
+	exitCode := runCommand(t.Context(), []string{"patch", "extra"}, createRepository(t), &stdout, &stderr)
+	if exitCode != 1 {
+		t.Fatalf("exit code = %d, want 1", exitCode)
+	}
+
+	if stdout.Len() != 0 {
+		t.Fatalf("stdout = %q, want empty", stdout.String())
+	}
+
+	got := stderr.String()
+
+	if !strings.HasPrefix(got, "tagit: usage: tagit [patch|minor|major]\n") {
+		t.Fatalf("stderr = %q, want error prefix", got)
+	}
+
+	if !strings.HasSuffix(got, helpMessage) {
+		t.Errorf("stderr = %q, want help suffix %q", got, helpMessage)
 	}
 }
 

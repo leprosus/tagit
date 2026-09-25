@@ -32,10 +32,12 @@ tagit minor    # v0.0.1 -> v0.1.0
 tagit major    # v0.0.1 -> v1.0.1
 tagit list     # lists valid SemVer tags from oldest to newest
 tagit list 10  # lists the latest 10 valid SemVer tags
+tagit set v1.2.3 # creates the v1.2.3 tag
 ```
 
-When invoked without arguments outside a Git repository, `tagit` prints its
-usage help.
+Outside a Git repository, or with an invalid `set` version, `tagit` prints
+usage help and exits successfully. For every other error, it writes the error
+and usage help to standard error, then exits with status `1`.
 
 The command considers only stable tags in the exact `v{MAJOR}.{MINOR}.{PATCH}` form,
 chooses the greatest version, creates the next tag locally, and prints it. It
