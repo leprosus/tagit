@@ -1,4 +1,4 @@
-package main
+package git
 
 import (
 	"context"
@@ -6,27 +6,29 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
+
+	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
-type git struct {
+type Git struct {
 	dirPath string
 }
 
-func newGit(dirPath string) git {
-	return git{dirPath: dirPath}
+func New(dirPath string) Git {
+	return Git{dirPath: dirPath}
 }
 
-func makeCommand(ctx context.Context, argumentList ...string) (command *exec.Cmd) {
+func MakeCommand(ctx context.Context, argumentList ...string) (command *exec.Cmd) {
 	command = exec.CommandContext(ctx, "git")
 	command.Args = append(command.Args, argumentList...)
 
 	return command
 }
 
-func (g git) getTagList(ctx context.Context) (tagList []string, err error) {
+func (g Git) GetTagList(ctx context.Context) (tagList []string, err error) {
 	var output string
 
-	output, err = g.runCommand(ctx, "tag", "--list")
+	output, err = g.RunCommand(ctx, "tag", "--list")
 	if err != nil {
 		return tagList, err
 	}
@@ -40,10 +42,10 @@ func (g git) getTagList(ctx context.Context) (tagList []string, err error) {
 	return tagList, nil
 }
 
-func (g git) hasTag(ctx context.Context, tag string) (result bool, err error) {
+func (g Git) HasTag(ctx context.Context, tag string) (result bool, err error) {
 	var tagList []string
 
-	tagList, err = g.getTagList(ctx)
+	tagList, err = g.GetTagList(ctx)
 	if err != nil {
 		return result, err
 	}
@@ -57,9 +59,9 @@ func (g git) hasTag(ctx context.Context, tag string) (result bool, err error) {
 	return result, nil
 }
 
-func (g git) isRepository(ctx context.Context) (result bool, err error) {
+func (g Git) IsRepository(ctx context.Context) (result bool, err error) {
 	argumentList := []string{"rev-parse", "--git-dir"}
-	command := makeCommand(ctx, argumentList...)
+	command := MakeCommand(ctx, argumentList...)
 	command.Dir = g.dirPath
 
 	const localisation = "LC_ALL=C"
@@ -83,18 +85,18 @@ func (g git) isRepository(ctx context.Context) (result bool, err error) {
 		return false, nil
 	}
 
-	return false, newGitCommandError(argumentList, err, response)
+	return false, errtypes.NewGitCommandError(argumentList, err, response)
 }
 
-func (g git) runCommand(ctx context.Context, argumentList ...string) (output string, err error) {
-	command := makeCommand(ctx, argumentList...)
+func (g Git) RunCommand(ctx context.Context, argumentList ...string) (output string, err error) {
+	command := MakeCommand(ctx, argumentList...)
 	command.Dir = g.dirPath
 
 	var bs []byte
 
 	bs, err = command.CombinedOutput()
 	if err != nil {
-		return output, newGitCommandError(argumentList, err, strings.TrimSpace(string(bs)))
+		return output, errtypes.NewGitCommandError(argumentList, err, strings.TrimSpace(string(bs)))
 	}
 
 	output = string(bs)

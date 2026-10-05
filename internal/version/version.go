@@ -1,23 +1,25 @@
-package main
+package version
 
 import (
 	"fmt"
 	"math"
 	"regexp"
 	"strconv"
+
+	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
-type version struct {
+type Version struct {
 	major uint64
 	minor uint64
 	patch uint64
 }
 
-func (v version) String() (result string) {
+func (v Version) String() (result string) {
 	return fmt.Sprintf("v%d.%d.%d", v.major, v.minor, v.patch)
 }
 
-func (v version) Compare(other version) (result int) {
+func (v Version) Compare(other Version) (result int) {
 	if v.major < other.major {
 		return -1
 	}
@@ -47,7 +49,7 @@ func (v version) Compare(other version) (result int) {
 
 var versionPattern = regexp.MustCompile(`^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$`)
 
-func parseVersion(value string) (result version, ok bool) {
+func Parse(value string) (result Version, ok bool) {
 	const expectedParts = 4
 
 	matchList := versionPattern.FindStringSubmatch(value)
@@ -75,48 +77,48 @@ func parseVersion(value string) (result version, ok bool) {
 	return result, true
 }
 
-func (v version) getNextVersion(kind kind) (result version, err error) {
+func (v Version) Next(incrementKind Kind) (result Version, err error) {
 	result = v
 
-	switch kind {
-	case patch:
+	switch incrementKind {
+	case Patch:
 		if v.patch == math.MaxUint64 {
-			return result, newVersionOverflowError(patch)
+			return result, errtypes.NewVersionOverflowError(string(Patch))
 		}
 
 		result.patch++
 
-	case minor:
+	case Minor:
 		if v.minor == math.MaxUint64 {
-			return result, newVersionOverflowError(minor)
+			return result, errtypes.NewVersionOverflowError(string(Minor))
 		}
 
 		result.minor++
 		result.patch = 0
 
-	case major:
+	case Major:
 		if v.major == math.MaxUint64 {
-			return result, newVersionOverflowError(major)
+			return result, errtypes.NewVersionOverflowError(string(Major))
 		}
 
 		result.major++
 		result.minor = 0
 
 	default:
-		return result, newUnknownVersionIncrementError(kind)
+		return result, errtypes.NewUnknownVersionIncrementError(string(incrementKind))
 	}
 
 	return result, nil
 }
 
-func getLatestVersion(tagList []string) (latest version, found bool) {
+func Latest(tagList []string) (latest Version, found bool) {
 	var (
-		current version
+		current Version
 		isValid bool
 	)
 
 	for _, tag := range tagList {
-		current, isValid = parseVersion(tag)
+		current, isValid = Parse(tag)
 		if !isValid || (found && current.Compare(latest) <= 0) {
 			continue
 		}

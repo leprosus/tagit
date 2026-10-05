@@ -1,16 +1,20 @@
-package main
+package command_test
 
 import (
 	"bytes"
 	"errors"
 	"strings"
 	"testing"
+
+	"github.com/leprosus/tagit/command"
+	"github.com/leprosus/tagit/internal/cli"
+	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
 func TestRunApplicationCreatesAndIncrementsTagList(t *testing.T) {
 	t.Parallel()
 
-	directory := createRepository(t)
+	directory := command.Repository(t)
 
 	testCaseList := []struct {
 		argument string
@@ -30,14 +34,14 @@ func TestRunApplicationCreatesAndIncrementsTagList(t *testing.T) {
 			argumentList = []string{test.argument}
 		}
 
-		err := runApplication(t.Context(), argumentList, directory, &output)
+		err := cli.Execute(t.Context(), argumentList, directory, &output)
 		if err != nil {
-			t.Fatalf("runApplication(%q): %v", test.argument, err)
+			t.Fatalf("cli.Execute(%q): %v", test.argument, err)
 		}
 
 		got := strings.TrimSpace(output.String())
 		if got != test.want {
-			t.Errorf("runApplication(%q) printed %q, want %q", test.argument, got, test.want)
+			t.Errorf("cli.Execute(%q) printed %q, want %q", test.argument, got, test.want)
 		}
 	}
 }
@@ -55,8 +59,8 @@ func TestRunApplicationIncrementsZeroVersion(t *testing.T) {
 		{"major", "v1.0.0"},
 	}
 	for _, test := range testCaseList {
-		directory := createRepository(t)
-		runGitCommand(t, directory, "tag", "v0.0.0")
+		directory := command.Repository(t)
+		command.RunGit(t, directory, "tag", "v0.0.0")
 
 		var (
 			output       bytes.Buffer
@@ -66,30 +70,30 @@ func TestRunApplicationIncrementsZeroVersion(t *testing.T) {
 			argumentList = []string{test.argument}
 		}
 
-		err := runApplication(t.Context(), argumentList, directory, &output)
+		err := cli.Execute(t.Context(), argumentList, directory, &output)
 		if err != nil {
-			t.Fatalf("runApplication(%q): %v", test.argument, err)
+			t.Fatalf("cli.Execute(%q): %v", test.argument, err)
 		}
 
 		if got := strings.TrimSpace(output.String()); got != test.want {
-			t.Errorf("runApplication(%q) printed %q, want %q", test.argument, got, test.want)
+			t.Errorf("cli.Execute(%q) printed %q, want %q", test.argument, got, test.want)
 		}
 
-		runGitCommand(t, directory, "rev-parse", "--verify", "refs/tags/"+test.want)
+		command.RunGit(t, directory, "rev-parse", "--verify", "refs/tags/"+test.want)
 	}
 }
 
 func TestRunApplicationUsesHighestSemanticVersionAndIgnoresOtherTagList(t *testing.T) {
 	t.Parallel()
 
-	directory := createRepository(t)
+	directory := command.Repository(t)
 	for _, tag := range []string{"release", "v0.9.9", "v2.1.3", "v01.2.3"} {
-		runGitCommand(t, directory, "tag", tag)
+		command.RunGit(t, directory, "tag", tag)
 	}
 
 	var output bytes.Buffer
 
-	err := runApplication(t.Context(), []string{"patch"}, directory, &output)
+	err := cli.Execute(t.Context(), []string{"patch"}, directory, &output)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,12 +107,12 @@ func TestRunApplicationUsesHighestSemanticVersionAndIgnoresOtherTagList(t *testi
 func TestRunApplicationCreatesInitialTagWhenOnlyNonSemanticTagsExist(t *testing.T) {
 	t.Parallel()
 
-	directory := createRepository(t)
-	runGitCommand(t, directory, "tag", "release-2026")
+	directory := command.Repository(t)
+	command.RunGit(t, directory, "tag", "release-2026")
 
 	var output bytes.Buffer
 
-	err := runApplication(t.Context(), []string{"major"}, directory, &output)
+	err := cli.Execute(t.Context(), []string{"major"}, directory, &output)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,9 +128,9 @@ func TestRunApplicationReturnsUnknownVersionIncrementError(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err := runApplication(t.Context(), []string{"build"}, createRepository(t), &output)
+	err := cli.Execute(t.Context(), []string{"build"}, command.Repository(t), &output)
 
-	var target *unknownVersionIncrementError
+	var target *errtypes.UnknownVersionIncrementError
 	if !errors.As(err, &target) || !strings.Contains(err.Error(), "unknown version increment") {
 		t.Fatalf("error = %v", err)
 	}

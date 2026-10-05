@@ -3,10 +3,10 @@
 BREW_FORMULA ?= ../homebrew-tap/Formula/tagit.rb
 
 lint:
-	golangci-lint run .
+	golangci-lint run ./...
 
 test:
-	go test --race
+	go test --race ./...
 
 sha256:
 	@set -eu; \

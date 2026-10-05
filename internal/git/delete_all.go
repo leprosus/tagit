@@ -1,4 +1,4 @@
-package main
+package git
 
 import (
 	"context"
@@ -6,24 +6,14 @@ import (
 	"fmt"
 	"io"
 	"strings"
+
+	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
-func deleteAllVersionTags(ctx context.Context, curGit git, argumentList []string, stdout io.Writer) (err error) {
-	if len(argumentList) != 1 {
-		return newUsageError()
-	}
-
-	if _, isValid := parseVersion(argumentList[0]); !isValid {
-		return newUsageError()
-	}
-
-	return curGit.deleteAllTags(ctx, argumentList[0], stdout)
-}
-
-func (g git) deleteAllTags(ctx context.Context, tag string, stdout io.Writer) (err error) {
+func (g Git) DeleteAllTags(ctx context.Context, tag string, stdout io.Writer) (err error) {
 	var output string
 
-	output, err = g.runCommand(ctx, "remote")
+	output, err = g.RunCommand(ctx, "remote")
 	if err != nil {
 		return err
 	}
@@ -33,7 +23,7 @@ func (g git) deleteAllTags(ctx context.Context, tag string, stdout io.Writer) (e
 	for remote := range strings.FieldsSeq(output) {
 		err = g.deleteRemoteTag(ctx, remote, tag)
 		if err != nil {
-			failures = append(failures, newRemoteError(remote, err))
+			failures = append(failures, errtypes.NewRemoteError(remote, err))
 
 			continue
 		}
@@ -48,7 +38,7 @@ func (g git) deleteAllTags(ctx context.Context, tag string, stdout io.Writer) (e
 		return errors.Join(failures...)
 	}
 
-	err = g.deleteTag(ctx, tag)
+	err = g.DeleteTag(ctx, tag)
 	if err != nil {
 		return err
 	}
@@ -61,8 +51,8 @@ func (g git) deleteAllTags(ctx context.Context, tag string, stdout io.Writer) (e
 	return nil
 }
 
-func (g git) deleteRemoteTag(ctx context.Context, remote, tag string) (err error) {
-	urls, err := g.runCommand(ctx, "remote", "get-url", "--push", "--all", remote)
+func (g Git) deleteRemoteTag(ctx context.Context, remote, tag string) (err error) {
+	urls, err := g.RunCommand(ctx, "remote", "get-url", "--push", "--all", remote)
 	if err != nil {
 		return err
 	}
@@ -79,12 +69,12 @@ func (g git) deleteRemoteTag(ctx context.Context, remote, tag string) (err error
 	return errors.Join(failures...)
 }
 
-func (g git) deleteTagAtURL(ctx context.Context, url, tag string) (err error) {
+func (g Git) deleteTagAtURL(ctx context.Context, url, tag string) (err error) {
 	ref := "refs/tags/" + tag
 
 	var output string
 
-	output, err = g.runCommand(ctx, "ls-remote", "--refs", "--tags", "--", url, ref)
+	output, err = g.RunCommand(ctx, "ls-remote", "--refs", "--tags", "--", url, ref)
 	if err != nil {
 		return err
 	}
@@ -95,7 +85,7 @@ func (g git) deleteTagAtURL(ctx context.Context, url, tag string) (err error) {
 			continue
 		}
 
-		_, err = g.runCommand(ctx, "push", "--no-follow-tags", "--", url, ":"+ref)
+		_, err = g.RunCommand(ctx, "push", "--no-follow-tags", "--", url, ":"+ref)
 		if err != nil {
 			return err
 		}

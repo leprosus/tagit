@@ -23,10 +23,21 @@ Build the command:
 go build -o tagit .
 ```
 
+Local builds report `dev`. To embed a release version, build with:
+
+```sh
+go build -ldflags "-X github.com/leprosus/tagit/command.releaseVersion=v1.2.3" -o tagit .
+```
+
+Homebrew embeds the formula's release version when building the executable.
+Run `tagit ver` from any directory to print the running executable's version;
+this command does not require Git.
+
 Run it from a Git repository:
 
 ```sh
 tagit          # no semantic tags yet: creates v0.0.1; otherwise increments patch
+tagit ver      # prints the executable's release version, or dev for local builds
 tagit patch    # v0.0.1 -> v0.0.2
 tagit minor    # v0.0.1 -> v0.1.0
 tagit major    # v0.0.1 -> v1.0.1

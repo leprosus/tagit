@@ -97,6 +97,11 @@ linters:
       multi-func: false
   exclusions:
     generated: lax
+    rules:
+      # Version tests check private numeric components.
+      - path: internal/version/.*_test\.go
+        linters:
+          - testpackage
     presets:
       - comments
       - common-false-positives
