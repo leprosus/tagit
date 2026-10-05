@@ -2,7 +2,10 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"errors"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -357,6 +360,78 @@ func TestRunCommandReturnsErrorExitCodeAndPrintsHelp(t *testing.T) {
 
 	if !strings.HasSuffix(got, helpMessage) {
 		t.Errorf("stderr = %q, want help suffix %q", got, helpMessage)
+	}
+}
+
+func TestRunApplicationReturnsCancelledContextError(t *testing.T) {
+	t.Parallel()
+
+	directory := createRepository(t)
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+
+	var output bytes.Buffer
+
+	err := runApplication(ctx, []string{"list"}, directory, &output)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("error = %v, want context.Canceled", err)
+	}
+
+	if output.Len() != 0 {
+		t.Fatalf("stdout = %q, want empty", output.String())
+	}
+}
+
+func TestRunApplicationReturnsMissingGitError(t *testing.T) {
+	t.Setenv("PATH", t.TempDir())
+
+	var output bytes.Buffer
+
+	err := runApplication(t.Context(), []string{"list"}, t.TempDir(), &output)
+	if !errors.Is(err, exec.ErrNotFound) {
+		t.Fatalf("error = %v, want exec.ErrNotFound", err)
+	}
+
+	if output.Len() != 0 {
+		t.Fatalf("stdout = %q, want empty", output.String())
+	}
+}
+
+func TestRunCommandReportsRepositoryCheckFailure(t *testing.T) {
+	t.Parallel()
+
+	directory := filepath.Join(t.TempDir(), "missing")
+
+	var stdout, stderr bytes.Buffer
+
+	exitCode := runCommand(t.Context(), []string{"list"}, directory, &stdout, &stderr)
+	if exitCode != 1 || stdout.Len() != 0 || !strings.Contains(stderr.String(), "git rev-parse --git-dir:") {
+		t.Fatalf("exit code = %d, stdout = %q, stderr = %q", exitCode, stdout.String(), stderr.String())
+	}
+}
+
+func TestRunApplicationReturnsGitRepositoryAccessError(t *testing.T) {
+	directory := t.TempDir()
+	gitPath := filepath.Join(directory, "git")
+
+	err := os.WriteFile(gitPath, []byte("#!/bin/sh\nprintf 'fatal: cannot access repository: Permission denied\\n' >&2\nexit 128\n"), 0o700)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("PATH", directory)
+
+	var output bytes.Buffer
+
+	err = runApplication(t.Context(), []string{"list"}, directory, &output)
+
+	var target *gitCommandError
+	if !errors.As(err, &target) || !strings.Contains(err.Error(), "Permission denied") {
+		t.Fatalf("error = %v, want Git access error", err)
+	}
+
+	if output.Len() != 0 {
+		t.Fatalf("stdout = %q, want empty", output.String())
 	}
 }
 

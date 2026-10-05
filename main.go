@@ -25,7 +25,12 @@ func printHelp(stdout io.Writer) (err error) {
 func runApplication(ctx context.Context, argumentList []string, dirPath string, stdout io.Writer) (err error) {
 	curGit := newGit(dirPath)
 
-	if !curGit.isRepository(ctx) {
+	isRepository, err := curGit.isRepository(ctx)
+	if err != nil {
+		return err
+	}
+
+	if !isRepository {
 		return printHelp(stdout)
 	}
 

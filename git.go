@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"os/exec"
 	"slices"
 	"sort"
@@ -76,12 +77,33 @@ func (g git) hasTag(ctx context.Context, tag string) (result bool, err error) {
 	return result, nil
 }
 
-func (g git) isRepository(ctx context.Context) bool {
-	var err error
+func (g git) isRepository(ctx context.Context) (result bool, err error) {
+	argumentList := []string{"rev-parse", "--git-dir"}
+	command := makeCommand(ctx, argumentList...)
+	command.Dir = g.dirPath
 
-	_, err = g.runCommand(ctx, "rev-parse", "--git-dir")
+	const localisation = "LC_ALL=C"
 
-	return err == nil
+	command.Env = append(os.Environ(), localisation)
+
+	var output []byte
+
+	output, err = command.CombinedOutput()
+	if err == nil {
+		return true, nil
+	}
+
+	response := strings.TrimSpace(string(output))
+
+	const notRepositoryErrorPrefix = "fatal: not a git repository"
+
+	isNotRepository := strings.HasPrefix(response, notRepositoryErrorPrefix)
+
+	if command.ProcessState != nil && command.ProcessState.ExitCode() == 128 && isNotRepository {
+		return false, nil
+	}
+
+	return false, newGitCommandError(argumentList, err, response)
 }
 
 func (g git) getSortedVersionList(ctx context.Context) (versionList []version, err error) {

@@ -41,6 +41,9 @@ usage help and exits successfully. An invalid `del` version and every other
 error write the error and usage help to standard error, then exit with status
 `1`. Deleting a tag that does not exist completes without changes.
 
+Errors while checking the repository, including a missing Git executable or
+repository access failures, also exit with status `1` and write to standard error.
+
 The command considers only stable tags in the exact `v{MAJOR}.{MINOR}.{PATCH}` form,
 chooses the greatest version, creates the next tag locally, and prints it. It
 requires the Git command-line client and does not push tags to a remote.
