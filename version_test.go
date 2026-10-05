@@ -77,3 +77,12 @@ func TestGetLatestVersion(t *testing.T) {
 		t.Fatal("getLatestVersion accepted invalid tags")
 	}
 }
+
+func TestGetLatestVersionAcceptsZeroVersion(t *testing.T) {
+	t.Parallel()
+
+	got, found := getLatestVersion([]string{"release", "v0.0.0", "v01.0.0"})
+	if !found || got != (version{}) {
+		t.Fatalf("getLatestVersion returned (%v, %t), want (v0.0.0, true)", got, found)
+	}
+}

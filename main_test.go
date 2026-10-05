@@ -43,6 +43,43 @@ func TestRunApplicationCreatesAndIncrementsTagList(t *testing.T) {
 	}
 }
 
+func TestRunApplicationIncrementsZeroVersion(t *testing.T) {
+	t.Parallel()
+
+	testCaseList := []struct {
+		argument string
+		want     string
+	}{
+		{"", "v0.0.1"},
+		{"patch", "v0.0.1"},
+		{"minor", "v0.1.0"},
+		{"major", "v1.0.0"},
+	}
+	for _, test := range testCaseList {
+		directory := createRepository(t)
+		runGitCommand(t, directory, "tag", "v0.0.0")
+
+		var (
+			output       bytes.Buffer
+			argumentList []string
+		)
+		if test.argument != "" {
+			argumentList = []string{test.argument}
+		}
+
+		err := runApplication(t.Context(), argumentList, directory, &output)
+		if err != nil {
+			t.Fatalf("runApplication(%q): %v", test.argument, err)
+		}
+
+		if got := strings.TrimSpace(output.String()); got != test.want {
+			t.Errorf("runApplication(%q) printed %q, want %q", test.argument, got, test.want)
+		}
+
+		runGitCommand(t, directory, "rev-parse", "--verify", "refs/tags/"+test.want)
+	}
+}
+
 func TestRunApplicationUsesHighestSemanticVersionAndIgnoresOtherTagList(t *testing.T) {
 	t.Parallel()
 

@@ -117,7 +117,7 @@ func getLatestVersion(tagList []string) (latest version, found bool) {
 
 	for _, tag := range tagList {
 		current, isValid = parseVersion(tag)
-		if !isValid || current.Compare(latest) <= 0 {
+		if !isValid || (found && current.Compare(latest) <= 0) {
 			continue
 		}
 
