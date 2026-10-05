@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 )
 
 const helpMessage = `Usage: tagit [patch|minor|major]
        tagit list [limit]
        tagit set vMAJOR.MINOR.PATCH
        tagit del vMAJOR.MINOR.PATCH
+       tagit del-all vMAJOR.MINOR.PATCH
 
-Creates, increments, or lists semantic Git tags in the current repository.
+Creates, increments, lists, or deletes semantic Git tags.
+del-all deletes a tag from all remotes before deleting it locally.
 `
 
 func printHelp(stdout io.Writer) (err error) {
@@ -47,6 +48,8 @@ func runApplication(ctx context.Context, argumentList []string, dirPath string, 
 		return setVersionTag(ctx, curGit, arg, stdout)
 	case "del":
 		return deleteVersionTag(ctx, curGit, arg)
+	case "del-all":
+		return deleteAllVersionTags(ctx, curGit, arg, stdout)
 	}
 
 	if len(argumentList) > 1 {
@@ -60,116 +63,6 @@ func runApplication(ctx context.Context, argumentList []string, dirPath string, 
 	}
 
 	return increaseTag(ctx, curGit, incrementKind, stdout)
-}
-
-func increaseTag(ctx context.Context, curGit git, incrementKind kind, stdout io.Writer) (err error) {
-	var tag string
-
-	tag, err = curGit.increaseTag(ctx, incrementKind)
-	if err != nil {
-		return err
-	}
-
-	_, err = fmt.Fprintln(stdout, tag)
-	if err != nil {
-		return err
-	}
-
-	return err
-}
-
-func setVersionTag(ctx context.Context, curGit git, argumentList []string, stdout io.Writer) (err error) {
-	if len(argumentList) != 1 {
-		return printHelp(stdout)
-	}
-
-	_, isValid := parseVersion(argumentList[0])
-	if !isValid {
-		return printHelp(stdout)
-	}
-
-	err = curGit.createTag(ctx, argumentList[0])
-	if err != nil {
-		return err
-	}
-
-	_, err = fmt.Fprintln(stdout, argumentList[0])
-
-	return err
-}
-
-func deleteVersionTag(ctx context.Context, curGit git, argumentList []string) (err error) {
-	if len(argumentList) != 1 {
-		return newUsageError()
-	}
-
-	_, isValid := parseVersion(argumentList[0])
-	if !isValid {
-		return newUsageError()
-	}
-
-	err = curGit.deleteTag(ctx, argumentList[0])
-
-	return err
-}
-
-func printVersionTagList(ctx context.Context, curGit git, argumentList []string, stdout io.Writer) (err error) {
-	var limit int
-
-	limit, err = parseListLimit(argumentList)
-	if err != nil {
-		return err
-	}
-
-	var versionList []version
-
-	versionList, err = curGit.getSortedVersionList(ctx)
-	if err != nil {
-		return err
-	}
-
-	versionList = truncateVersionList(versionList, limit)
-	err = printVersionList(versionList, stdout)
-
-	return err
-}
-
-func parseListLimit(argumentList []string) (limit int, err error) {
-	if len(argumentList) > 1 {
-		return limit, newUsageError()
-	}
-
-	if len(argumentList) == 0 {
-		return limit, nil
-	}
-
-	limit, err = strconv.Atoi(argumentList[0])
-	if err != nil || limit < 1 {
-		return limit, newInvalidListLimitError(argumentList[0])
-	}
-
-	return limit, nil
-}
-
-func truncateVersionList(versionList []version, limit int) (result []version) {
-	if limit == 0 || len(versionList) <= limit {
-		return versionList
-	}
-
-	result = versionList[len(versionList)-limit:]
-
-	return result
-}
-
-func printVersionList(versionList []version, stdout io.Writer) (err error) {
-	for _, currentVersion := range versionList {
-		_, err = fmt.Fprintln(stdout, currentVersion)
-		if err != nil {
-			return err
-		}
-	}
-
-	return err
 }
 
 func main() {

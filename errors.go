@@ -70,3 +70,20 @@ func (e *gitCommandError) Error() (result string) {
 func (e *gitCommandError) Unwrap() (err error) {
 	return e.cause
 }
+
+type remoteError struct {
+	remote string
+	cause  error
+}
+
+func newRemoteError(remote string, cause error) (result *remoteError) {
+	return &remoteError{remote: remote, cause: cause}
+}
+
+func (e *remoteError) Error() (result string) {
+	return fmt.Sprintf("remote %q: %v", e.remote, e.cause)
+}
+
+func (e *remoteError) Unwrap() (err error) {
+	return e.cause
+}

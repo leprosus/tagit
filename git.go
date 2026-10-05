@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"slices"
-	"sort"
 	"strings"
 )
 
@@ -39,25 +38,6 @@ func (g git) getTagList(ctx context.Context) (tagList []string, err error) {
 	tagList = strings.Fields(output)
 
 	return tagList, nil
-}
-
-func (g git) createTag(ctx context.Context, tag string) (err error) {
-	_, err = g.runCommand(ctx, "tag", tag)
-
-	return err
-}
-
-func (g git) deleteTag(ctx context.Context, tag string) (err error) {
-	var hasTag bool
-
-	hasTag, err = g.hasTag(ctx, tag)
-	if err != nil || !hasTag {
-		return err
-	}
-
-	_, err = g.runCommand(ctx, "tag", "--delete", tag)
-
-	return err
 }
 
 func (g git) hasTag(ctx context.Context, tag string) (result bool, err error) {
@@ -106,30 +86,6 @@ func (g git) isRepository(ctx context.Context) (result bool, err error) {
 	return false, newGitCommandError(argumentList, err, response)
 }
 
-func (g git) getSortedVersionList(ctx context.Context) (versionList []version, err error) {
-	var tagList []string
-
-	tagList, err = g.getTagList(ctx)
-	if err != nil {
-		return versionList, err
-	}
-
-	for _, tag := range tagList {
-		currentVersion, isValid := parseVersion(tag)
-		if !isValid {
-			continue
-		}
-
-		versionList = append(versionList, currentVersion)
-	}
-
-	sort.Slice(versionList, func(left, right int) bool {
-		return versionList[left].Compare(versionList[right]) < 0
-	})
-
-	return versionList, err
-}
-
 func (g git) runCommand(ctx context.Context, argumentList ...string) (output string, err error) {
 	command := makeCommand(ctx, argumentList...)
 	command.Dir = g.dirPath
@@ -144,36 +100,4 @@ func (g git) runCommand(ctx context.Context, argumentList ...string) (output str
 	output = string(bs)
 
 	return output, nil
-}
-
-func (g git) increaseTag(ctx context.Context, kind kind) (tag string, err error) {
-	var tagList []string
-
-	tagList, err = g.getTagList(ctx)
-	if err != nil {
-		return tag, err
-	}
-
-	current, found := getLatestVersion(tagList)
-	if !found {
-		current = version{}
-
-		kind = patch
-	}
-
-	var next version
-
-	next, err = current.getNextVersion(kind)
-	if err != nil {
-		return tag, err
-	}
-
-	tag = next.String()
-
-	err = g.createTag(ctx, tag)
-	if err != nil {
-		return tag, err
-	}
-
-	return tag, nil
 }

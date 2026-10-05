@@ -34,6 +34,7 @@ tagit list     # lists valid SemVer tags from oldest to newest
 tagit list 10  # lists the latest 10 valid SemVer tags
 tagit set v1.2.3 # creates the v1.2.3 tag
 tagit del v1.2.3 # deletes the v1.2.3 tag when it exists
+tagit del-all v1.2.3 # deletes the tag from all remotes, then locally
 ```
 
 Outside a Git repository, or with an invalid `set` version, `tagit` prints
@@ -46,4 +47,17 @@ repository access failures, also exit with status `1` and write to standard erro
 
 The command considers only stable tags in the exact `v{MAJOR}.{MINOR}.{PATCH}` form,
 chooses the greatest version, creates the next tag locally, and prints it. It
-requires the Git command-line client and does not push tags to a remote.
+requires the Git command-line client. Tag creation is local and does not push tags
+to a remote; `del-all` performs remote deletion.
+
+`del-all` checks and deletes the exact tag on every configured remote's push URL
+(including multiple push URLs). It reports each successfully processed remote
+on standard output. Tags that are already absent count as successfully processed.
+After all remotes succeed, it deletes the local tag and reports the local result.
+With no remotes configured, it only deletes the local tag.
+
+If a remote fails, `del-all` continues with the remaining remotes, reports the
+failures on standard error, and exits with status `1`. The local tag is retained;
+successful remote deletions are not rolled back. Run the command again after
+resolving the failure to complete deletion. If a remote has separate fetch and
+push URLs, only its push destinations are modified.

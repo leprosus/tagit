@@ -6,7 +6,7 @@ lint:
 	golangci-lint run .
 
 test:
-	go test
+	go test --race
 
 sha256:
 	@set -eu; \
