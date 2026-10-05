@@ -9,8 +9,14 @@ test:
 	go test
 
 sha256:
-	@version="$$(git describe --tags --abbrev=0)"; \
-		curl -fsSL "https://github.com/leprosus/tagit/archive/refs/tags/$${version}.tar.gz" | shasum -a 256 | awk '{print $$1}'
+	@set -eu; \
+		version="$$(git describe --tags --abbrev=0)"; \
+		archive="$$(mktemp)"; \
+		trap 'rm -f "$$archive"' EXIT; \
+		trap 'exit 1' HUP INT TERM; \
+		curl -fsSL -o "$$archive" "https://github.com/leprosus/tagit/archive/refs/tags/$${version}.tar.gz"; \
+		checksum="$$(shasum -a 256 "$$archive")"; \
+		printf '%s\n' "$${checksum%% *}"
 
 brew:
 	@set -eu; \
