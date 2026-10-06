@@ -7,7 +7,6 @@ import (
 
 	"github.com/leprosus/tagit/command"
 	"github.com/leprosus/tagit/internal/cli"
-	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
 func TestRunApplicationListsVersionTags(t *testing.T) {
@@ -69,7 +68,7 @@ func TestRunApplicationReturnsInvalidListLimitError(t *testing.T) {
 			&output,
 		)
 
-		var target *errtypes.InvalidListLimitError
+		var target *command.InvalidListLimitError
 		if !errors.As(err, &target) || target.Value != value {
 			t.Fatalf("error = %v", err)
 		}

@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/leprosus/tagit/command"
-	errtypes "github.com/leprosus/tagit/internal/errors"
 	"github.com/leprosus/tagit/internal/git"
 )
 
@@ -76,7 +75,7 @@ func TestIsRepositoryReturnsGitAccessError(t *testing.T) {
 
 	found, err = git.New(directory).IsRepository(t.Context())
 
-	var target *errtypes.GitCommandError
+	var target *git.GitCommandError
 	if found || !errors.As(err, &target) || target.Output != "fatal: cannot access repository: Permission denied" {
 		t.Fatalf("found=%t error=%v, want Git access error", found, err)
 	}

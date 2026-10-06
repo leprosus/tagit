@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"io"
 
-	errtypes "github.com/leprosus/tagit/internal/errors"
+	"github.com/leprosus/tagit/command"
 )
 
 const HelpMessage = `Usage: tagit [patch|minor|major]
        tagit help [command]
        tagit ver
+       tagit latest
        tagit list [limit]
        tagit set vMAJOR.MINOR.PATCH
        tagit del vMAJOR.MINOR.PATCH
@@ -40,12 +41,12 @@ func showHelp(argumentList []string, stdout io.Writer) (err error) {
 	}
 
 	if len(argumentList) != 1 {
-		return errtypes.NewUsageError()
+		return command.NewUsageError()
 	}
 
 	message := commandHelp(argumentList[0])
 	if message == "" {
-		return errtypes.NewUsageError()
+		return command.NewUsageError()
 	}
 
 	_, err = fmt.Fprint(stdout, message)
@@ -55,6 +56,8 @@ func showHelp(argumentList []string, stdout io.Writer) (err error) {
 
 func commandHelp(name string) (message string) {
 	switch name {
+	case "latest":
+		return "Usage: tagit latest\n\nPrints the greatest local version tag. Exits with status 1 if none exist.\n"
 	case "patch", "minor", "major":
 		return "Usage: tagit " + name + "\n\nCreates the next local version tag using the " + name + " increment.\n"
 	case "list":

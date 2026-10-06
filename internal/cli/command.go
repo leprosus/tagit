@@ -7,7 +7,6 @@ import (
 	"io"
 
 	"github.com/leprosus/tagit/command"
-	errtypes "github.com/leprosus/tagit/internal/errors"
 	"github.com/leprosus/tagit/internal/git"
 	"github.com/leprosus/tagit/internal/version"
 )
@@ -69,6 +68,13 @@ func dispatchCommand(
 	commandName, arg := argumentList[0], argumentList[1:]
 
 	switch commandName {
+	case "latest":
+		return command.Latest(
+			ctx,
+			curGit,
+			arg,
+			stdout,
+		)
 	case "list":
 		return command.List(
 			ctx,
@@ -95,13 +101,13 @@ func dispatchCommand(
 	}
 
 	if len(argumentList) > 1 {
-		return errtypes.NewUsageError()
+		return command.NewUsageError()
 	}
 
 	incrementKind := version.Kind(argumentList[0])
 
 	if !incrementKind.IsValid() {
-		return errtypes.NewUnknownVersionIncrementError(string(incrementKind))
+		return command.NewUnknownVersionIncrementError(string(incrementKind))
 	}
 
 	return command.Increase(
@@ -149,7 +155,7 @@ func setTag(
 		stdout,
 	)
 
-	_, isUsageError := errors.AsType[*errtypes.UsageError](err)
+	_, isUsageError := errors.AsType[*command.UsageError](err)
 	if isUsageError {
 		return printHelp(stdout)
 	}

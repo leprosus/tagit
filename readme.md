@@ -34,6 +34,7 @@ Run it from a Git repository:
 ```sh
 tagit          # no semantic tags yet: creates v0.0.1; otherwise increments patch
 tagit ver      # prints the executable's release version, or dev for local builds
+tagit latest   # prints the greatest local version tag
 tagit --help   # shows help successfully, from any directory
 tagit help list # shows help for a command; tagit list --help also works
 tagit patch    # v0.0.1 -> v0.0.2
@@ -47,6 +48,11 @@ tagit del-all v1.2.3 # deletes the tag from all remotes, then locally
 ```
 
 Commands use positional arguments. Ctrl+C cancels active Git subprocesses.
+
+`tagit latest` compares local tags numerically in the exact `vMAJOR.MINOR.PATCH`
+format, including `v0.0.0`, regardless of tag creation dates or the current branch.
+It does not fetch remote tags or modify the repository. If no valid version tags
+exist, it leaves stdout empty, reports an error on stderr, and exits with status `1`.
 
 Outside a Git repository, or with an invalid `set` version, `tagit` prints
 usage help and exits successfully. An invalid `del` version and every other

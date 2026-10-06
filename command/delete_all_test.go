@@ -8,9 +8,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/leprosus/tagit/internal/git"
+
 	"github.com/leprosus/tagit/command"
 	"github.com/leprosus/tagit/internal/cli"
-	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
 func TestDeleteAllTags(t *testing.T) {
@@ -408,12 +409,12 @@ func TestDeleteAllTagsHandlesRejectedPush(t *testing.T) {
 		&output,
 	)
 
-	var remoteFailure *errtypes.RemoteError
+	var remoteFailure *git.RemoteError
 	if !errors.As(err, &remoteFailure) || remoteFailure.Remote != "a-rejected" {
 		t.Fatalf("error=%v, want rejected remote", err)
 	}
 
-	var gitFailure *errtypes.GitCommandError
+	var gitFailure *git.GitCommandError
 	if !errors.As(err, &gitFailure) || len(gitFailure.ArgumentList) == 0 || gitFailure.ArgumentList[0] != "push" {
 		t.Fatalf("error=%v, want underlying Git push error", err)
 	}

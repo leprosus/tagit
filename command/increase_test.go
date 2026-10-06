@@ -8,7 +8,6 @@ import (
 
 	"github.com/leprosus/tagit/command"
 	"github.com/leprosus/tagit/internal/cli"
-	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
 func TestRunApplicationCreatesAndIncrementsTagList(t *testing.T) {
@@ -187,7 +186,7 @@ func TestRunApplicationReturnsUnknownVersionIncrementError(t *testing.T) {
 		&output,
 	)
 
-	var target *errtypes.UnknownVersionIncrementError
+	var target *command.UnknownVersionIncrementError
 	if !errors.As(err, &target) || !strings.Contains(err.Error(), "unknown version increment") {
 		t.Fatalf("error = %v", err)
 	}

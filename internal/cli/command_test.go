@@ -9,8 +9,6 @@ import (
 
 	"github.com/leprosus/tagit/command"
 	"github.com/leprosus/tagit/internal/cli"
-
-	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
 func TestRunApplicationShowsHelpOutsideRepository(t *testing.T) {
@@ -62,7 +60,7 @@ func TestRunApplicationReturnsUsageError(t *testing.T) {
 		&output,
 	)
 
-	var target *errtypes.UsageError
+	var target *command.UsageError
 	if !errors.As(err, &target) || !strings.Contains(err.Error(), "usage:") {
 		t.Fatalf("error = %v", err)
 	}

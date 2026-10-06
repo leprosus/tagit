@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-
-	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
 func (g Git) DeleteAllTags(ctx context.Context, tag string, stdout io.Writer) (err error) {
@@ -23,7 +21,7 @@ func (g Git) DeleteAllTags(ctx context.Context, tag string, stdout io.Writer) (e
 	for remote := range strings.FieldsSeq(output) {
 		err = g.deleteRemoteTag(ctx, remote, tag)
 		if err != nil {
-			failures = append(failures, errtypes.NewRemoteError(remote, err))
+			failures = append(failures, NewRemoteError(remote, err))
 
 			continue
 		}

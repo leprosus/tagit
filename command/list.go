@@ -6,7 +6,6 @@ import (
 	"io"
 	"strconv"
 
-	errtypes "github.com/leprosus/tagit/internal/errors"
 	"github.com/leprosus/tagit/internal/git"
 	"github.com/leprosus/tagit/internal/version"
 )
@@ -43,7 +42,7 @@ func List(
 
 func parseListLimit(argumentList []string) (limit int, err error) {
 	if len(argumentList) > 1 {
-		return limit, errtypes.NewUsageError()
+		return limit, NewUsageError()
 	}
 
 	if len(argumentList) == 0 {
@@ -52,7 +51,7 @@ func parseListLimit(argumentList []string) (limit int, err error) {
 
 	limit, err = strconv.Atoi(argumentList[0])
 	if err != nil || limit < 1 {
-		return limit, errtypes.NewInvalidListLimitError(argumentList[0])
+		return limit, NewInvalidListLimitError(argumentList[0])
 	}
 
 	return limit, nil

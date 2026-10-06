@@ -6,8 +6,6 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
-
-	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
 type Git struct {
@@ -85,7 +83,7 @@ func (g Git) IsRepository(ctx context.Context) (result bool, err error) {
 		return false, nil
 	}
 
-	return false, errtypes.NewGitCommandError(argumentList, err, response)
+	return false, NewGitCommandError(argumentList, err, response)
 }
 
 func (g Git) RunCommand(ctx context.Context, argumentList ...string) (output string, err error) {
@@ -96,7 +94,7 @@ func (g Git) RunCommand(ctx context.Context, argumentList ...string) (output str
 
 	bs, err = command.CombinedOutput()
 	if err != nil {
-		return output, errtypes.NewGitCommandError(argumentList, err, strings.TrimSpace(string(bs)))
+		return output, NewGitCommandError(argumentList, err, strings.TrimSpace(string(bs)))
 	}
 
 	output = string(bs)

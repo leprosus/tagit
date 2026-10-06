@@ -4,8 +4,6 @@ import (
 	"errors"
 	"math"
 	"testing"
-
-	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
 func TestParseVersion(t *testing.T) {
@@ -75,7 +73,7 @@ func TestVersionGetNextVersion(t *testing.T) {
 
 	_, err = (Version{patch: math.MaxUint64}).Next(Patch)
 
-	var target *errtypes.VersionOverflowError
+	var target *VersionOverflowError
 	if !errors.As(err, &target) || target.Kind != string(Patch) {
 		t.Fatalf("overflow error = %v", err)
 	}

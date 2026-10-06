@@ -5,8 +5,6 @@ import (
 	"math"
 	"regexp"
 	"strconv"
-
-	errtypes "github.com/leprosus/tagit/internal/errors"
 )
 
 type Version struct {
@@ -88,14 +86,14 @@ func (v Version) Next(incrementKind Kind) (result Version, err error) {
 	switch incrementKind {
 	case Patch:
 		if v.patch == math.MaxUint64 {
-			return result, errtypes.NewVersionOverflowError(string(Patch))
+			return result, NewVersionOverflowError(string(Patch))
 		}
 
 		result.patch++
 
 	case Minor:
 		if v.minor == math.MaxUint64 {
-			return result, errtypes.NewVersionOverflowError(string(Minor))
+			return result, NewVersionOverflowError(string(Minor))
 		}
 
 		result.minor++
@@ -103,14 +101,14 @@ func (v Version) Next(incrementKind Kind) (result Version, err error) {
 
 	case Major:
 		if v.major == math.MaxUint64 {
-			return result, errtypes.NewVersionOverflowError(string(Major))
+			return result, NewVersionOverflowError(string(Major))
 		}
 
 		result.major++
 		result.minor = 0
 
 	default:
-		return result, errtypes.NewUnknownVersionIncrementError(string(incrementKind))
+		return result, NewUnknownVersionIncrementError(string(incrementKind))
 	}
 
 	return result, nil
@@ -133,4 +131,28 @@ func Latest(tagList []string) (latest Version, found bool) {
 	}
 
 	return latest, found
+}
+
+type UnknownVersionIncrementError struct {
+	Kind string
+}
+
+func NewUnknownVersionIncrementError(kind string) (result *UnknownVersionIncrementError) {
+	return &UnknownVersionIncrementError{Kind: kind}
+}
+
+func (e *UnknownVersionIncrementError) Error() (result string) {
+	return fmt.Sprintf("unknown version increment %q: use patch, minor, or major", e.Kind)
+}
+
+type VersionOverflowError struct {
+	Kind string
+}
+
+func NewVersionOverflowError(kind string) (result *VersionOverflowError) {
+	return &VersionOverflowError{Kind: kind}
+}
+
+func (e *VersionOverflowError) Error() (result string) {
+	return e.Kind + " version overflow"
 }
