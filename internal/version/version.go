@@ -16,7 +16,12 @@ type Version struct {
 }
 
 func (v Version) String() (result string) {
-	return fmt.Sprintf("v%d.%d.%d", v.major, v.minor, v.patch)
+	return fmt.Sprintf(
+		"v%d.%d.%d",
+		v.major,
+		v.minor,
+		v.patch,
+	)
 }
 
 func (v Version) Compare(other Version) (result int) {

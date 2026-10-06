@@ -20,10 +20,10 @@ func TestRunApplicationCreatesAndIncrementsTagList(t *testing.T) {
 		argument string
 		want     string
 	}{
-		{"", "v0.0.1"},
-		{"patch", "v0.0.2"},
-		{"minor", "v0.1.0"},
-		{"major", "v1.0.0"},
+		{argument: "", want: "v0.0.1"},
+		{argument: "patch", want: "v0.0.2"},
+		{argument: "minor", want: "v0.1.0"},
+		{argument: "major", want: "v1.0.0"},
 	}
 	for _, test := range testCaseList {
 		var (
@@ -34,14 +34,24 @@ func TestRunApplicationCreatesAndIncrementsTagList(t *testing.T) {
 			argumentList = []string{test.argument}
 		}
 
-		err := cli.Execute(t.Context(), argumentList, directory, &output)
+		err := cli.Execute(
+			t.Context(),
+			argumentList,
+			directory,
+			&output,
+		)
 		if err != nil {
 			t.Fatalf("cli.Execute(%q): %v", test.argument, err)
 		}
 
 		got := strings.TrimSpace(output.String())
 		if got != test.want {
-			t.Errorf("cli.Execute(%q) printed %q, want %q", test.argument, got, test.want)
+			t.Errorf(
+				"cli.Execute(%q) printed %q, want %q",
+				test.argument,
+				got,
+				test.want,
+			)
 		}
 	}
 }
@@ -53,14 +63,19 @@ func TestRunApplicationIncrementsZeroVersion(t *testing.T) {
 		argument string
 		want     string
 	}{
-		{"", "v0.0.1"},
-		{"patch", "v0.0.1"},
-		{"minor", "v0.1.0"},
-		{"major", "v1.0.0"},
+		{argument: "", want: "v0.0.1"},
+		{argument: "patch", want: "v0.0.1"},
+		{argument: "minor", want: "v0.1.0"},
+		{argument: "major", want: "v1.0.0"},
 	}
 	for _, test := range testCaseList {
 		directory := command.Repository(t)
-		command.RunGit(t, directory, "tag", "v0.0.0")
+		command.RunGit(
+			t,
+			directory,
+			"tag",
+			"v0.0.0",
+		)
 
 		var (
 			output       bytes.Buffer
@@ -70,16 +85,33 @@ func TestRunApplicationIncrementsZeroVersion(t *testing.T) {
 			argumentList = []string{test.argument}
 		}
 
-		err := cli.Execute(t.Context(), argumentList, directory, &output)
+		err := cli.Execute(
+			t.Context(),
+			argumentList,
+			directory,
+			&output,
+		)
 		if err != nil {
 			t.Fatalf("cli.Execute(%q): %v", test.argument, err)
 		}
 
-		if got := strings.TrimSpace(output.String()); got != test.want {
-			t.Errorf("cli.Execute(%q) printed %q, want %q", test.argument, got, test.want)
+		got := strings.TrimSpace(output.String())
+		if got != test.want {
+			t.Errorf(
+				"cli.Execute(%q) printed %q, want %q",
+				test.argument,
+				got,
+				test.want,
+			)
 		}
 
-		command.RunGit(t, directory, "rev-parse", "--verify", "refs/tags/"+test.want)
+		command.RunGit(
+			t,
+			directory,
+			"rev-parse",
+			"--verify",
+			"refs/tags/"+test.want,
+		)
 	}
 }
 
@@ -88,12 +120,22 @@ func TestRunApplicationUsesHighestSemanticVersionAndIgnoresOtherTagList(t *testi
 
 	directory := command.Repository(t)
 	for _, tag := range []string{"release", "v0.9.9", "v2.1.3", "v01.2.3"} {
-		command.RunGit(t, directory, "tag", tag)
+		command.RunGit(
+			t,
+			directory,
+			"tag",
+			tag,
+		)
 	}
 
 	var output bytes.Buffer
 
-	err := cli.Execute(t.Context(), []string{"patch"}, directory, &output)
+	err := cli.Execute(
+		t.Context(),
+		[]string{"patch"},
+		directory,
+		&output,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,11 +150,21 @@ func TestRunApplicationCreatesInitialTagWhenOnlyNonSemanticTagsExist(t *testing.
 	t.Parallel()
 
 	directory := command.Repository(t)
-	command.RunGit(t, directory, "tag", "release-2026")
+	command.RunGit(
+		t,
+		directory,
+		"tag",
+		"release-2026",
+	)
 
 	var output bytes.Buffer
 
-	err := cli.Execute(t.Context(), []string{"major"}, directory, &output)
+	err := cli.Execute(
+		t.Context(),
+		[]string{"major"},
+		directory,
+		&output,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +180,12 @@ func TestRunApplicationReturnsUnknownVersionIncrementError(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err := cli.Execute(t.Context(), []string{"build"}, command.Repository(t), &output)
+	err := cli.Execute(
+		t.Context(),
+		[]string{"build"},
+		command.Repository(t),
+		&output,
+	)
 
 	var target *errtypes.UnknownVersionIncrementError
 	if !errors.As(err, &target) || !strings.Contains(err.Error(), "unknown version increment") {

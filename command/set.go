@@ -10,7 +10,12 @@ import (
 	"github.com/leprosus/tagit/internal/version"
 )
 
-func Set(ctx context.Context, curGit git.Git, argumentList []string, stdout io.Writer) (err error) {
+func Set(
+	ctx context.Context,
+	curGit git.Git,
+	argumentList []string,
+	stdout io.Writer,
+) (err error) {
 	if len(argumentList) != 1 {
 		return errtypes.NewUsageError()
 	}

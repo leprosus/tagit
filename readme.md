@@ -34,6 +34,8 @@ Run it from a Git repository:
 ```sh
 tagit          # no semantic tags yet: creates v0.0.1; otherwise increments patch
 tagit ver      # prints the executable's release version, or dev for local builds
+tagit --help   # shows help successfully, from any directory
+tagit help list # shows help for a command; tagit list --help also works
 tagit patch    # v0.0.1 -> v0.0.2
 tagit minor    # v0.0.1 -> v0.1.0
 tagit major    # v0.0.1 -> v1.0.1
@@ -43,6 +45,8 @@ tagit set v1.2.3 # creates the v1.2.3 tag
 tagit del v1.2.3 # deletes the v1.2.3 tag when it exists
 tagit del-all v1.2.3 # deletes the tag from all remotes, then locally
 ```
+
+Commands use positional arguments. Ctrl+C cancels active Git subprocesses.
 
 Outside a Git repository, or with an invalid `set` version, `tagit` prints
 usage help and exits successfully. An invalid `del` version and every other

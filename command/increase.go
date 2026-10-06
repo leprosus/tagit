@@ -9,7 +9,12 @@ import (
 	"github.com/leprosus/tagit/internal/version"
 )
 
-func Increase(ctx context.Context, curGit git.Git, incrementKind version.Kind, stdout io.Writer) (err error) {
+func Increase(
+	ctx context.Context,
+	curGit git.Git,
+	incrementKind version.Kind,
+	stdout io.Writer,
+) (err error) {
 	var tag string
 
 	tag, err = curGit.IncreaseTag(ctx, incrementKind)

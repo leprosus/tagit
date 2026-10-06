@@ -28,7 +28,12 @@ func (g Git) DeleteAllTags(ctx context.Context, tag string, stdout io.Writer) (e
 			continue
 		}
 
-		_, err = fmt.Fprintf(stdout, "%s: %s deleted or already absent\n", remote, tag)
+		_, err = fmt.Fprintf(
+			stdout,
+			"%s: %s deleted or already absent\n",
+			remote,
+			tag,
+		)
 		if err != nil {
 			failures = append(failures, err)
 		}
@@ -52,7 +57,16 @@ func (g Git) DeleteAllTags(ctx context.Context, tag string, stdout io.Writer) (e
 }
 
 func (g Git) deleteRemoteTag(ctx context.Context, remote, tag string) (err error) {
-	urls, err := g.RunCommand(ctx, "remote", "get-url", "--push", "--all", remote)
+	var urls string
+
+	urls, err = g.RunCommand(
+		ctx,
+		"remote",
+		"get-url",
+		"--push",
+		"--all",
+		remote,
+	)
 	if err != nil {
 		return err
 	}
@@ -74,7 +88,15 @@ func (g Git) deleteTagAtURL(ctx context.Context, url, tag string) (err error) {
 
 	var output string
 
-	output, err = g.RunCommand(ctx, "ls-remote", "--refs", "--tags", "--", url, ref)
+	output, err = g.RunCommand(
+		ctx,
+		"ls-remote",
+		"--refs",
+		"--tags",
+		"--",
+		url,
+		ref,
+	)
 	if err != nil {
 		return err
 	}
@@ -85,7 +107,14 @@ func (g Git) deleteTagAtURL(ctx context.Context, url, tag string) (err error) {
 			continue
 		}
 
-		_, err = g.RunCommand(ctx, "push", "--no-follow-tags", "--", url, ":"+ref)
+		_, err = g.RunCommand(
+			ctx,
+			"push",
+			"--no-follow-tags",
+			"--",
+			url,
+			":"+ref,
+		)
 		if err != nil {
 			return err
 		}

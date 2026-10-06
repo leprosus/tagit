@@ -20,12 +20,18 @@ func TestIsRepository(t *testing.T) {
 		directory string
 		want      bool
 	}{
-		{command.Repository(t), true},
-		{t.TempDir(), false},
+		{directory: command.Repository(t), want: true},
+		{directory: t.TempDir(), want: false},
 	} {
 		got, err := git.New(test.directory).IsRepository(t.Context())
 		if err != nil || got != test.want {
-			t.Fatalf("IsRepository(%q) = (%t, %v), want %t", test.directory, got, err, test.want)
+			t.Fatalf(
+				"IsRepository(%q) = (%t, %v), want %t",
+				test.directory,
+				got,
+				err,
+				test.want,
+			)
 		}
 	}
 }
@@ -55,13 +61,20 @@ func TestIsRepositoryReturnsGitAccessError(t *testing.T) {
 	directory := t.TempDir()
 	gitPath := filepath.Join(directory, "git")
 
-	err := os.WriteFile(gitPath, []byte("#!/bin/sh\nprintf 'fatal: cannot access repository: Permission denied\\n' >&2\nexit 128\n"), 0o700)
+	script := "#!/bin/sh\n" +
+		"printf 'fatal: cannot access repository: Permission denied\\n' >&2\n" +
+		"exit 128\n"
+
+	err := os.WriteFile(gitPath, []byte(script), 0o700)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	t.Setenv("PATH", directory)
-	found, err := git.New(directory).IsRepository(t.Context())
+
+	var found bool
+
+	found, err = git.New(directory).IsRepository(t.Context())
 
 	var target *errtypes.GitCommandError
 	if found || !errors.As(err, &target) || target.Output != "fatal: cannot access repository: Permission denied" {

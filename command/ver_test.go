@@ -14,9 +14,20 @@ func TestVerWorksWithoutGitOutsideRepository(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 
-	code := cli.Run(t.Context(), []string{"ver"}, t.TempDir(), &stdout, &stderr)
+	code := cli.Run(
+		t.Context(),
+		[]string{"ver"},
+		t.TempDir(),
+		&stdout,
+		&stderr,
+	)
 	if code != 0 || stdout.String() != "dev\n" || stderr.Len() != 0 {
-		t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		t.Fatalf(
+			"code=%d stdout=%q stderr=%q",
+			code,
+			stdout.String(),
+			stderr.String(),
+		)
 	}
 }
 
@@ -25,9 +36,20 @@ func TestVerRejectsExtraArguments(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 
-	code := cli.Run(t.Context(), []string{"ver", "extra"}, t.TempDir(), &stdout, &stderr)
+	code := cli.Run(
+		t.Context(),
+		[]string{"ver", "extra"},
+		t.TempDir(),
+		&stdout,
+		&stderr,
+	)
 	if code != 1 || stdout.Len() != 0 || stderr.Len() == 0 {
-		t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		t.Fatalf(
+			"code=%d stdout=%q stderr=%q",
+			code,
+			stdout.String(),
+			stderr.String(),
+		)
 	}
 }
 
@@ -39,8 +61,8 @@ func TestVerBuildVersion(t *testing.T) {
 		flags string
 		want  string
 	}{
-		{"development", "", "dev\n"},
-		{"release", "-s -w -X github.com/leprosus/tagit/command.releaseVersion=v1.2.3", "v1.2.3\n"},
+		{name: "development", flags: "", want: "dev\n"},
+		{name: "release", flags: "-s -w -X github.com/leprosus/tagit/command.releaseVersion=v1.2.3", want: "v1.2.3\n"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -48,7 +70,16 @@ func TestVerBuildVersion(t *testing.T) {
 
 			binary := filepath.Join(t.TempDir(), "tagit")
 			// All arguments come from fixed test fixtures and a temporary directory.
-			build := exec.CommandContext(t.Context(), "go", "build", "-ldflags", test.flags, "-o", binary, "..") //nolint:gosec
+			build := exec.CommandContext( //nolint:gosec
+				t.Context(),
+				"go",
+				"build",
+				"-ldflags",
+				test.flags,
+				"-o",
+				binary,
+				"..",
+			)
 
 			output, err := build.CombinedOutput()
 			if err != nil {
@@ -61,7 +92,12 @@ func TestVerBuildVersion(t *testing.T) {
 
 			output, err = invocation.CombinedOutput()
 			if err != nil || string(output) != test.want {
-				t.Fatalf("ver: output=%q error=%v want=%q", output, err, test.want)
+				t.Fatalf(
+					"ver: output=%q error=%v want=%q",
+					output,
+					err,
+					test.want,
+				)
 			}
 		})
 	}

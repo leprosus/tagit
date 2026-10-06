@@ -28,14 +28,24 @@ func TestRunApplicationShowsHelpOutsideRepository(t *testing.T) {
 	for _, argumentList := range testCaseList {
 		var output bytes.Buffer
 
-		err := cli.Execute(t.Context(), argumentList, t.TempDir(), &output)
+		err := cli.Execute(
+			t.Context(),
+			argumentList,
+			t.TempDir(),
+			&output,
+		)
 		if err != nil {
 			t.Fatalf("cli.Execute(%q): %v", argumentList, err)
 		}
 
 		got := output.String()
 		if got != cli.HelpMessage {
-			t.Errorf("cli.Execute(%q) printed %q, want %q", argumentList, got, cli.HelpMessage)
+			t.Errorf(
+				"cli.Execute(%q) printed %q, want %q",
+				argumentList,
+				got,
+				cli.HelpMessage,
+			)
 		}
 	}
 }
@@ -45,7 +55,12 @@ func TestRunApplicationReturnsUsageError(t *testing.T) {
 
 	var output bytes.Buffer
 
-	err := cli.Execute(t.Context(), []string{"patch", "extra"}, command.Repository(t), &output)
+	err := cli.Execute(
+		t.Context(),
+		[]string{"patch", "extra"},
+		command.Repository(t),
+		&output,
+	)
 
 	var target *errtypes.UsageError
 	if !errors.As(err, &target) || !strings.Contains(err.Error(), "usage:") {
@@ -61,7 +76,13 @@ func TestRunCommandReturnsErrorExitCodeAndPrintsHelp(t *testing.T) {
 		stderr bytes.Buffer
 	)
 
-	exitCode := cli.Run(t.Context(), []string{"del", "1.2.3"}, command.Repository(t), &stdout, &stderr)
+	exitCode := cli.Run(
+		t.Context(),
+		[]string{"del", "1.2.3"},
+		command.Repository(t),
+		&stdout,
+		&stderr,
+	)
 	if exitCode != 1 {
 		t.Fatalf("exit code = %d, want 1", exitCode)
 	}
@@ -88,8 +109,19 @@ func TestRunCommandReportsRepositoryCheckFailure(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 
-	exitCode := cli.Run(t.Context(), []string{"list"}, directory, &stdout, &stderr)
+	exitCode := cli.Run(
+		t.Context(),
+		[]string{"list"},
+		directory,
+		&stdout,
+		&stderr,
+	)
 	if exitCode != 1 || stdout.Len() != 0 || !strings.Contains(stderr.String(), "git rev-parse --git-dir:") {
-		t.Fatalf("exit code = %d, stdout = %q, stderr = %q", exitCode, stdout.String(), stderr.String())
+		t.Fatalf(
+			"exit code = %d, stdout = %q, stderr = %q",
+			exitCode,
+			stdout.String(),
+			stderr.String(),
+		)
 	}
 }

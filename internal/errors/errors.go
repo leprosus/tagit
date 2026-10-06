@@ -64,7 +64,12 @@ func NewGitCommandError(argumentList []string, cause error, output string) (resu
 }
 
 func (e *GitCommandError) Error() (result string) {
-	return fmt.Sprintf("git %s: %v: %s", strings.Join(e.ArgumentList, " "), e.Cause, e.Output)
+	return fmt.Sprintf(
+		"git %s: %v: %s",
+		strings.Join(e.ArgumentList, " "),
+		e.Cause,
+		e.Output,
+	)
 }
 
 func (e *GitCommandError) Unwrap() (err error) {

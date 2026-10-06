@@ -11,7 +11,12 @@ import (
 	"github.com/leprosus/tagit/internal/version"
 )
 
-func List(ctx context.Context, curGit git.Git, argumentList []string, stdout io.Writer) (err error) {
+func List(
+	ctx context.Context,
+	curGit git.Git,
+	argumentList []string,
+	stdout io.Writer,
+) (err error) {
 	var limit int
 
 	limit, err = parseListLimit(argumentList)

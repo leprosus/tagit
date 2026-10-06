@@ -12,11 +12,21 @@ func TestRunApplicationDeletesVersionTag(t *testing.T) {
 	t.Parallel()
 
 	directory := command.Repository(t)
-	command.RunGit(t, directory, "tag", "v1.2.3")
+	command.RunGit(
+		t,
+		directory,
+		"tag",
+		"v1.2.3",
+	)
 
 	var output bytes.Buffer
 
-	err := cli.Execute(t.Context(), []string{"del", "v1.2.3"}, directory, &output)
+	err := cli.Execute(
+		t.Context(),
+		[]string{"del", "v1.2.3"},
+		directory,
+		&output,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +35,12 @@ func TestRunApplicationDeletesVersionTag(t *testing.T) {
 		t.Fatalf("printed %q, want empty", output.String())
 	}
 
-	err = cli.Execute(t.Context(), []string{"list"}, directory, &output)
+	err = cli.Execute(
+		t.Context(),
+		[]string{"list"},
+		directory,
+		&output,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,11 +54,21 @@ func TestRunApplicationIgnoresMissingVersionTag(t *testing.T) {
 	t.Parallel()
 
 	directory := command.Repository(t)
-	command.RunGit(t, directory, "tag", "v1.2.4")
+	command.RunGit(
+		t,
+		directory,
+		"tag",
+		"v1.2.4",
+	)
 
 	var output bytes.Buffer
 
-	err := cli.Execute(t.Context(), []string{"del", "v1.2.3"}, directory, &output)
+	err := cli.Execute(
+		t.Context(),
+		[]string{"del", "v1.2.3"},
+		directory,
+		&output,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,7 +77,12 @@ func TestRunApplicationIgnoresMissingVersionTag(t *testing.T) {
 		t.Fatalf("printed %q, want empty", output.String())
 	}
 
-	err = cli.Execute(t.Context(), []string{"list"}, directory, &output)
+	err = cli.Execute(
+		t.Context(),
+		[]string{"list"},
+		directory,
+		&output,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

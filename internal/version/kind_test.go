@@ -17,7 +17,12 @@ func TestKindIsValid(t *testing.T) {
 	for input, want := range testList {
 		got = input.IsValid()
 		if got != want {
-			t.Errorf("Kind(%q).IsValid() = %t, want %t", input, got, want)
+			t.Errorf(
+				"Kind(%q).IsValid() = %t, want %t",
+				input,
+				got,
+				want,
+			)
 		}
 	}
 }

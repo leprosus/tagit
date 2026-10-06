@@ -12,7 +12,12 @@ func (g Git) DeleteTag(ctx context.Context, tag string) (err error) {
 		return err
 	}
 
-	_, err = g.RunCommand(ctx, "tag", "--delete", tag)
+	_, err = g.RunCommand(
+		ctx,
+		"tag",
+		"--delete",
+		tag,
+	)
 	if err != nil {
 		return err
 	}

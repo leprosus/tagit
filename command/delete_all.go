@@ -9,12 +9,18 @@ import (
 	"github.com/leprosus/tagit/internal/version"
 )
 
-func DeleteAll(ctx context.Context, curGit git.Git, argumentList []string, stdout io.Writer) (err error) {
+func DeleteAll(
+	ctx context.Context,
+	curGit git.Git,
+	argumentList []string,
+	stdout io.Writer,
+) (err error) {
 	if len(argumentList) != 1 {
 		return errtypes.NewUsageError()
 	}
 
-	if _, isValid := version.Parse(argumentList[0]); !isValid {
+	_, isValid := version.Parse(argumentList[0])
+	if !isValid {
 		return errtypes.NewUsageError()
 	}
 
