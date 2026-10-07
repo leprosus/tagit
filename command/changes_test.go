@@ -269,9 +269,9 @@ func assertChanges(t *testing.T, directory string, args, want []string) {
 			continue
 		}
 
-		hash, message, found := strings.Cut(line, " ")
-		if !found || len(hash) < 4 {
-			t.Fatalf("invalid commit line %q", line)
+		message, found := strings.CutPrefix(line, "Message: ")
+		if !found {
+			continue
 		}
 
 		messages = append(messages, message)

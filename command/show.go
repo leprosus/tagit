@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"github.com/leprosus/tagit/internal/git"
@@ -24,27 +23,12 @@ func Show(
 		return NewUsageError()
 	}
 
-	var info git.TagInfo
+	var info git.CommitInfo
 
 	info, err = curGit.GetTagInfo(ctx, argumentList[0])
 	if err != nil {
 		return err
 	}
 
-	message := "Message: (none)"
-	if info.Message != "" {
-		message = "Message:\n" + info.Message
-	}
-
-	_, err = fmt.Fprintf(
-		stdout,
-		"Tag: %s\nCommit: %s\nAuthor: %s\nDate: %s\n%s\n",
-		argumentList[0],
-		info.Commit,
-		info.Author,
-		info.CommitDate,
-		message,
-	)
-
-	return err
+	return info.Write(stdout)
 }

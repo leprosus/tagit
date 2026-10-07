@@ -20,14 +20,12 @@ func Changes(
 		return err
 	}
 
-	var output string
+	var commits git.CommitInfoList
 
-	output, err = curGit.GetChanges(ctx, tag)
+	commits, err = curGit.GetChanges(ctx, tag)
 	if err != nil {
 		return err
 	}
 
-	_, err = io.WriteString(stdout, output)
-
-	return err
+	return commits.WriteCommitList(stdout)
 }

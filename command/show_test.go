@@ -51,7 +51,7 @@ func assertShow(t *testing.T, annotated bool) {
 			"Release 1.2.3\n\nDetails",
 		)
 
-		message = "Message:\nRelease 1.2.3\n\nDetails\n"
+		message = "Message: Release 1.2.3\n"
 	} else {
 		command.RunGit(
 			t,
@@ -86,7 +86,7 @@ func assertShow(t *testing.T, annotated bool) {
 
 	output := stdout.String()
 
-	prefix := "Tag: v1.2.3\nCommit: " + strings.TrimSpace(commit) + "\nAuthor: Test User <test@example.com>\nDate: "
+	prefix := "Commit: " + strings.TrimSpace(commit) + "\nAuthor: Test User <test@example.com>\nDate: "
 	if !strings.HasPrefix(output, prefix) || !strings.HasSuffix(output, message) {
 		t.Fatalf("unexpected output: %q", output)
 	}
@@ -201,7 +201,7 @@ func TestShowUsesCommitAuthor(t *testing.T) {
 
 	output := stdout.String()
 	if !strings.Contains(output, "Author: Alice <alice@example.com>\nDate: 2026-10-07T15:42:10+02:00\n") ||
-		!strings.HasSuffix(output, "Message:\nTag message\n") {
+		!strings.HasSuffix(output, "Message: Tag message\n") {
 		t.Fatalf("output=%q", output)
 	}
 }

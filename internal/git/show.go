@@ -5,14 +5,7 @@ import (
 	"strings"
 )
 
-type TagInfo struct {
-	Commit     string
-	Author     string
-	CommitDate string
-	Message    string
-}
-
-func (g Git) GetTagInfo(ctx context.Context, tag string) (info TagInfo, err error) {
+func (g Git) GetTagInfo(ctx context.Context, tag string) (info CommitInfo, err error) {
 	var found bool
 
 	found, err = g.HasTag(ctx, tag)
@@ -54,7 +47,7 @@ func (g Git) GetTagInfo(ctx context.Context, tag string) (info TagInfo, err erro
 		return info, err
 	}
 
-	info.Author, info.CommitDate, _ = strings.Cut(strings.TrimRight(metadata, "\n"), "\x00")
+	info.Author, info.Date, _ = strings.Cut(strings.TrimRight(metadata, "\n"), "\x00")
 
 	var objectType string
 

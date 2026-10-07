@@ -34,9 +34,9 @@ func TestHistoryDetailedOutput(t *testing.T) {
 		"Second change",
 		"2026-10-07T15:42:10+02:00",
 	)
-	want := "Commit: " + second + "\nAuthor: Alice <alice@example.com>\nDate: 2026-10-07T15:42:10+02:00\nMessage:\nSecond change\n\n" +
+	want := "Commit: " + second + "\nAuthor: Alice <alice@example.com>\nDate: 2026-10-07T15:42:10+02:00\nMessage: Second change\n\n" +
 		"Commit: " + first + "\nAuthor: Alice <alice@example.com>\nDate: 2026-10-07T14:18:03+02:00\n" +
-		"Message:\nFirst change\n\nDetails\n\nCommit: this is message text\n"
+		"Message: First change\n"
 	before := repositoryTags(t, directory)
 
 	var stdout, stderr bytes.Buffer
@@ -320,12 +320,12 @@ func assertHistoryMessages(t *testing.T, directory string, args, want []string) 
 	}
 
 	output := stdout.String()
-	if strings.Count(output, "Message:\n") != len(want) {
+	if strings.Count(output, "Message: ") != len(want) {
 		t.Fatalf("output=%q want=%q", output, want)
 	}
 
 	for _, message := range want {
-		_, rest, found := strings.Cut(output, "Message:\n"+message+"\n")
+		_, rest, found := strings.Cut(output, "Message: "+message+"\n")
 		if !found {
 			t.Fatalf("missing or unordered message %q in %q", message, output)
 		}

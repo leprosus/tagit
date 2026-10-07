@@ -54,7 +54,7 @@ tagit del-all v1.2.3  # deletes the tag from all remotes, then locally
 
 Commands use positional arguments. Ctrl+C cancels active Git subprocesses.
 
-`tagit show v1.2.3` prints the tag name, full commit hash, commit author (name and email), committer date in
+`tagit show v1.2.3` prints the full commit hash, commit author (name and email), committer date in
 ISO 8601 format, and the annotated tag message. Lightweight tags display
 `Message: (none)`. The date belongs to the commit, not the tag creation time.
 The command reads only local tags and does not modify the repository. A missing
@@ -96,14 +96,15 @@ argument it selects the greatest local SemVer tag, as `tagit latest` does; if
 none exist it lists the entire history reachable from `HEAD`. The selected tag
 may be on another branch: the same reachability rule applies.
 
-Each line contains a short commit hash and the first line of its message, newest
-first (Git date order). An empty range produces no output and succeeds. Invalid
+Each commit uses the same block format as `history` and `show`: full commit
+hash, author, committer date, and the first line of the message on the same
+line as `Message:`, newest first (Git date order). An empty range produces no output and succeeds. Invalid
 arguments, a missing explicit tag, or a Git error produce exit status 1.
 The command only reads the local repository.
 
-`tagit history [vMAJOR.MINOR.PATCH]` selects the same range as `changes`, but
+`tagit history [vMAJOR.MINOR.PATCH]` selects the same range and uses the same output as `changes`. It
 prints a separate block for each commit: full hash, author name and email,
-committer date in ISO 8601, and the full commit message. Blocks are separated
+committer date in ISO 8601, and the first line of the commit message. Blocks are separated
 by a blank line. Lightweight and annotated tags select the same commit range;
 tag annotations are not commit messages. Empty ranges succeed without output.
 
@@ -113,17 +114,18 @@ Example output:
 Commit: 9f8e7d6c5b4a32100123456789abcdef01234567
 Author: Ivan Petrov <ivan@example.com>
 Date: 2026-10-07T15:42:10+02:00
-Message:
-Add changes command
-
-Use the greatest local SemVer tag when no version is supplied.
+Message: Add changes command
 
 Commit: 123456789abcdef0123456789abcdef012345678
 Author: Ivan Petrov <ivan@example.com>
 Date: 2026-10-07T14:18:03+02:00
-Message:
-Fix tag validation
+Message: Fix tag validation
 ```
 
 `show` also displays the commit author; its `Message` remains the annotated
 tag's message, or `(none)` for a lightweight tag.
+
+All three commands use the same field order: `Commit`, `Author`, `Date`,
+`Message`. Each message is displayed on one line; subsequent lines are omitted.
+For `show`, this is the first line of the annotated tag message, or `(none)`
+for a lightweight tag.

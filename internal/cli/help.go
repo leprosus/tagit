@@ -64,10 +64,10 @@ func commandHelp(name string) (message string) {
 
 	messages := map[string]string{
 		"history": "Usage: tagit history [vMAJOR.MINOR.PATCH]\n\n" +
-			"Shows full commit hashes, authors, committer dates, and full messages, newest first.\n" +
+			"Shows full commit hashes, authors, committer dates, and first message lines, newest first.\n" +
 			"Uses the same range as changes: the specified tag, greatest version tag, or all HEAD history.\n",
 		"changes": "Usage: tagit changes [vMAJOR.MINOR.PATCH]\n\n" +
-			"Lists commits after the specified local tag up to HEAD, newest first.\n" +
+			"Shows commit details after the specified local tag up to HEAD, newest first.\n" +
 			"Defaults to the greatest local version tag, or all HEAD history if none exist.\n",
 		"show": "Usage: tagit show vMAJOR.MINOR.PATCH\n\n" +
 			"Shows the local tag's commit, author, commit date, and annotated tag message when present.\n",

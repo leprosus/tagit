@@ -5,14 +5,7 @@ import (
 	"strings"
 )
 
-type CommitInfo struct {
-	Commit     string
-	Author     string
-	CommitDate string
-	Message    string
-}
-
-func (g Git) GetHistory(ctx context.Context, tag string) (commits []CommitInfo, err error) {
+func (g Git) GetHistory(ctx context.Context, tag string) (commits CommitInfoList, err error) {
 	var revision string
 
 	revision, err = g.historyRevision(ctx, tag)
@@ -51,13 +44,13 @@ func (g Git) GetHistory(ctx context.Context, tag string) (commits []CommitInfo, 
 		return nil, NewInvalidHistoryOutputError()
 	}
 
-	commits = make([]CommitInfo, 0, len(fields)/fieldCount)
+	commits = make(CommitInfoList, 0, len(fields)/fieldCount)
 	for i := 0; i < len(fields); i += fieldCount {
 		commits = append(commits, CommitInfo{
-			Commit:     fields[i],
-			Author:     fields[i+1],
-			CommitDate: fields[i+2],
-			Message:    strings.TrimRight(fields[i+3], "\n"),
+			Commit:  fields[i],
+			Author:  fields[i+1],
+			Date:    fields[i+2],
+			Message: fields[i+3],
 		})
 	}
 
