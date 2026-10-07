@@ -55,8 +55,8 @@ tagit del-all v1.2.3  # deletes the tag from all remotes, then locally
 Commands use positional arguments. Ctrl+C cancels active Git subprocesses.
 
 `tagit show v1.2.3` prints the full commit hash, commit author (name and email), committer date in
-ISO 8601 format, and the annotated tag message. Lightweight tags display
-`Message: (none)`. The date belongs to the commit, not the tag creation time.
+ISO 8601 format, and the first line of the commit message for both lightweight
+and annotated tags. The date belongs to the commit, not the tag creation time.
 The command reads only local tags and does not modify the repository. A missing
 tag or invalid argument produces an error with exit status `1` and empty stdout.
 
@@ -96,10 +96,16 @@ argument it selects the greatest local SemVer tag, as `tagit latest` does; if
 none exist it lists the entire history reachable from `HEAD`. The selected tag
 may be on another branch: the same reachability rule applies.
 
-Each commit uses the same block format as `history` and `show`: full commit
-hash, author, committer date, and the first line of the message on the same
-line as `Message:`, newest first (Git date order). An empty range produces no output and succeeds. Invalid
-arguments, a missing explicit tag, or a Git error produce exit status 1.
+Each line contains Git's short commit hash, a colon, and the first line of
+its message, newest first (Git date order), for example:
+
+```text
+dee943a: Ref: skeleton and code-design
+e5ec5ab: Ref: tagit [history|changes|show] output
+```
+
+An empty range produces no output and succeeds. Invalid arguments, a missing
+explicit tag, or a Git error produce exit status 1.
 The command only reads the local repository.
 
 `tagit history [vMAJOR.MINOR.PATCH]` selects the same range as `changes`, but displays commits oldest first with local tags. It
@@ -124,16 +130,14 @@ Date: 2026-10-07T15:42:10+02:00
 Message: Add changes command
 ```
 
-`show` also displays the commit author; its `Message` remains the annotated
-tag's message, or `(none)` for a lightweight tag.
+`show` displays the commit author and the commit message, regardless of tag type.
 
-All three commands share the field order: `Commit`, `Author`, `Date`,
+`history` and `show` share the field order: `Commit`, `Author`, `Date`,
 `Message`. Each message is displayed on one line; subsequent lines are omitted.
-For `show`, this is the first line of the annotated tag message, or `(none)`
-for a lightweight tag.
+For `show`, this is the first line of the tagged commit message.
 
 `history` displays commits from oldest to newest (the reverse of Git date
 order). Each block starts with `Tag`, listing the local tags pointing to that
 commit in name order, separated by commas, or `(none)` if it has no tags.
 The starting tag's commit is still excluded from the selected range.
-`changes` retains its newest-first order and four-field output.
+`changes` retains its newest-first order and uses the compact one-line output.

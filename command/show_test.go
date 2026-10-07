@@ -38,7 +38,7 @@ func assertShow(t *testing.T, annotated bool) {
 		t.Fatal(err)
 	}
 
-	message := "Message: (none)\n"
+	message := "Message: initial\n"
 
 	if annotated {
 		command.RunGit(
@@ -50,8 +50,6 @@ func assertShow(t *testing.T, annotated bool) {
 			"-m",
 			"Release 1.2.3\n\nDetails",
 		)
-
-		message = "Message: Release 1.2.3\n"
 	} else {
 		command.RunGit(
 			t,
@@ -174,7 +172,7 @@ func TestShowUsesCommitAuthor(t *testing.T) {
 	historyCommit(
 		t,
 		directory,
-		"Commit message",
+		"Commit message\n\nBody excluded",
 		"2026-10-07T15:42:10+02:00",
 	)
 	command.RunGit(
@@ -201,7 +199,7 @@ func TestShowUsesCommitAuthor(t *testing.T) {
 
 	output := stdout.String()
 	if !strings.Contains(output, "Author: Alice <alice@example.com>\nDate: 2026-10-07T15:42:10+02:00\n") ||
-		!strings.HasSuffix(output, "Message: Tag message\n") {
+		!strings.HasSuffix(output, "Message: Commit message\n") {
 		t.Fatalf("output=%q", output)
 	}
 }

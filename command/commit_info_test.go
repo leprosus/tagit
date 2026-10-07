@@ -2,7 +2,10 @@ package command_test
 
 import (
 	"bytes"
+	"strings"
 	"testing"
+
+	"github.com/leprosus/tagit/internal/git"
 
 	"github.com/leprosus/tagit/command"
 	"github.com/leprosus/tagit/internal/cli"
@@ -33,6 +36,16 @@ func TestCommitOutputIsConsistent(t *testing.T) {
 		"Subject\n\nTag body excluded",
 	)
 
+	shortHash, err := git.New(directory).RunCommand(
+		t.Context(),
+		"rev-parse",
+		"--short",
+		hash,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	want := "Commit: " + hash + "\nAuthor: Alice <alice@example.com>\nDate: 2026-10-07T15:42:10+02:00\nMessage: Subject\n"
 
 	for _, args := range [][]string{
@@ -51,6 +64,10 @@ func TestCommitOutputIsConsistent(t *testing.T) {
 		)
 
 		expected := want
+		if args[0] == "changes" {
+			expected = strings.TrimSpace(shortHash) + ": Subject\n"
+		}
+
 		if args[0] == "history" {
 			expected = "Tag: v1.2.3\n" + want
 		}

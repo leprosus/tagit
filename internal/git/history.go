@@ -50,7 +50,7 @@ func (g Git) getHistory(ctx context.Context, tag string) (commits CommitInfoList
 		"--no-show-signature",
 		"--date-order",
 		"-z",
-		"--format=%H%x00%an <%ae>%x00%cI%x00%B",
+		"--format=%H%x00%h%x00%an <%ae>%x00%cI%x00%B",
 		revision,
 		"--",
 	)
@@ -62,7 +62,7 @@ func (g Git) getHistory(ctx context.Context, tag string) (commits CommitInfoList
 		return nil, nil
 	}
 
-	const fieldCount = 4
+	const fieldCount = 5
 
 	// NUL separates fields and records; newlines belong to the commit message.
 	fields := strings.Split(strings.TrimSuffix(output, "\x00"), "\x00")
@@ -73,10 +73,11 @@ func (g Git) getHistory(ctx context.Context, tag string) (commits CommitInfoList
 	commits = make(CommitInfoList, 0, len(fields)/fieldCount)
 	for i := 0; i < len(fields); i += fieldCount {
 		commits = append(commits, CommitInfo{
-			Commit:  fields[i],
-			Author:  fields[i+1],
-			Date:    fields[i+2],
-			Message: fields[i+3],
+			Commit:      fields[i],
+			ShortCommit: fields[i+1],
+			Author:      fields[i+2],
+			Date:        fields[i+3],
+			Message:     fields[i+4],
 		})
 	}
 

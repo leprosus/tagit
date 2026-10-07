@@ -39,7 +39,7 @@ func (g Git) GetTagInfo(ctx context.Context, tag string) (info CommitInfo, err e
 		"--no-patch",
 		"--no-notes",
 		"--no-show-signature",
-		"--format=%an <%ae>%x00%cI",
+		"--format=%an <%ae>%x00%cI%x00%B",
 		info.Commit,
 		"--",
 	)
@@ -47,38 +47,8 @@ func (g Git) GetTagInfo(ctx context.Context, tag string) (info CommitInfo, err e
 		return info, err
 	}
 
-	info.Author, info.Date, _ = strings.Cut(strings.TrimRight(metadata, "\n"), "\x00")
-
-	var objectType string
-
-	objectType, err = g.RunCommand(
-		ctx,
-		"cat-file",
-		"-t",
-		ref,
-	)
-	if err != nil {
-		return info, err
-	}
-
-	if strings.TrimSpace(objectType) != "tag" {
-		return info, nil
-	}
-
-	var object string
-
-	object, err = g.RunCommand(
-		ctx,
-		"cat-file",
-		"-p",
-		ref,
-	)
-	if err != nil {
-		return info, err
-	}
-
-	_, info.Message, _ = strings.Cut(object, "\n\n")
-	info.Message = strings.TrimRight(info.Message, "\n")
+	info.Author, metadata, _ = strings.Cut(metadata, "\x00")
+	info.Date, info.Message, _ = strings.Cut(metadata, "\x00")
 
 	return info, nil
 }

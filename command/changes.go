@@ -27,5 +27,5 @@ func Changes(
 		return err
 	}
 
-	return commits.Write(stdout)
+	return commits.WriteShort(stdout)
 }
