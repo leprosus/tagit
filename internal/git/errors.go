@@ -44,3 +44,15 @@ func (e *RemoteError) Error() (result string) {
 func (e *RemoteError) Unwrap() (err error) {
 	return e.Cause
 }
+
+type TagNotFoundError struct {
+	Tag string
+}
+
+func NewTagNotFoundError(tag string) (result *TagNotFoundError) {
+	return &TagNotFoundError{Tag: tag}
+}
+
+func (e *TagNotFoundError) Error() (result string) {
+	return fmt.Sprintf("local tag %q not found", e.Tag)
+}

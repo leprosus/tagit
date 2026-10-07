@@ -68,6 +68,13 @@ func dispatchCommand(
 	commandName, arg := argumentList[0], argumentList[1:]
 
 	switch commandName {
+	case "show":
+		return command.Show(
+			ctx,
+			curGit,
+			arg,
+			stdout,
+		)
 	case "latest":
 		return command.Latest(
 			ctx,
