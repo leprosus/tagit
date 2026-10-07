@@ -102,7 +102,7 @@ line as `Message:`, newest first (Git date order). An empty range produces no ou
 arguments, a missing explicit tag, or a Git error produce exit status 1.
 The command only reads the local repository.
 
-`tagit history [vMAJOR.MINOR.PATCH]` selects the same range and uses the same output as `changes`. It
+`tagit history [vMAJOR.MINOR.PATCH]` selects the same range as `changes`, but displays commits oldest first with local tags. It
 prints a separate block for each commit: full hash, author name and email,
 committer date in ISO 8601, and the first line of the commit message. Blocks are separated
 by a blank line. Lightweight and annotated tags select the same commit range;
@@ -111,21 +111,29 @@ tag annotations are not commit messages. Empty ranges succeed without output.
 Example output:
 
 ```text
-Commit: 9f8e7d6c5b4a32100123456789abcdef01234567
-Author: Ivan Petrov <ivan@example.com>
-Date: 2026-10-07T15:42:10+02:00
-Message: Add changes command
-
+Tag: (none)
 Commit: 123456789abcdef0123456789abcdef012345678
 Author: Ivan Petrov <ivan@example.com>
 Date: 2026-10-07T14:18:03+02:00
 Message: Fix tag validation
+
+Tag: v1.2.4
+Commit: 9f8e7d6c5b4a32100123456789abcdef01234567
+Author: Ivan Petrov <ivan@example.com>
+Date: 2026-10-07T15:42:10+02:00
+Message: Add changes command
 ```
 
 `show` also displays the commit author; its `Message` remains the annotated
 tag's message, or `(none)` for a lightweight tag.
 
-All three commands use the same field order: `Commit`, `Author`, `Date`,
+All three commands share the field order: `Commit`, `Author`, `Date`,
 `Message`. Each message is displayed on one line; subsequent lines are omitted.
 For `show`, this is the first line of the annotated tag message, or `(none)`
 for a lightweight tag.
+
+`history` displays commits from oldest to newest (the reverse of Git date
+order). Each block starts with `Tag`, listing the local tags pointing to that
+commit in name order, separated by commas, or `(none)` if it has no tags.
+The starting tag's commit is still excluded from the selected range.
+`changes` retains its newest-first order and four-field output.

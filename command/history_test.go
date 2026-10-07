@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 
@@ -34,9 +35,10 @@ func TestHistoryDetailedOutput(t *testing.T) {
 		"Second change",
 		"2026-10-07T15:42:10+02:00",
 	)
-	want := "Commit: " + second + "\nAuthor: Alice <alice@example.com>\nDate: 2026-10-07T15:42:10+02:00\nMessage: Second change\n\n" +
-		"Commit: " + first + "\nAuthor: Alice <alice@example.com>\nDate: 2026-10-07T14:18:03+02:00\n" +
-		"Message: First change\n"
+	want := "Tag: (none)\nCommit: " + first + "\nAuthor: Alice <alice@example.com>\nDate: 2026-10-07T14:18:03+02:00\n" +
+		"Message: First change\n\nTag: (none)\nCommit: " + second +
+		"\nAuthor: Alice <alice@example.com>\nDate: 2026-10-07T15:42:10+02:00\nMessage: Second change\n"
+
 	before := repositoryTags(t, directory)
 
 	var stdout, stderr bytes.Buffer
@@ -324,12 +326,59 @@ func assertHistoryMessages(t *testing.T, directory string, args, want []string) 
 		t.Fatalf("output=%q want=%q", output, want)
 	}
 
-	for _, message := range want {
+	expected := slices.Clone(want)
+	slices.Reverse(expected)
+
+	for _, message := range expected {
 		_, rest, found := strings.Cut(output, "Message: "+message+"\n")
 		if !found {
 			t.Fatalf("missing or unordered message %q in %q", message, output)
 		}
 
 		output = rest
+	}
+}
+
+func TestHistoryMultipleTags(t *testing.T) {
+	t.Parallel()
+	directory := command.Repository(t)
+	command.RunGit(
+		t,
+		directory,
+		"tag",
+		"v0.0.0",
+	)
+	historyCommit(
+		t,
+		directory,
+		"Tagged change",
+		"2026-10-07T15:42:10+02:00",
+	)
+	command.RunGit(
+		t,
+		directory,
+		"tag",
+		"v1.2.3",
+	)
+	command.RunGit(
+		t,
+		directory,
+		"tag",
+		"-a",
+		"release",
+		"-m",
+		"Annotation",
+	)
+
+	var stdout bytes.Buffer
+
+	err := command.History(
+		t.Context(),
+		git.New(directory),
+		[]string{"v0.0.0"},
+		&stdout,
+	)
+	if err != nil || !strings.HasPrefix(stdout.String(), "Tag: release, v1.2.3\nCommit: ") {
+		t.Fatalf("error=%v output=%q", err, stdout.String())
 	}
 }

@@ -7,6 +7,7 @@ import (
 )
 
 type CommitInfo struct {
+	Tag     string
 	Commit  string
 	Author  string
 	Date    string
@@ -21,6 +22,13 @@ func (c CommitInfo) Write(stdout io.Writer) (err error) {
 	message = strings.TrimSuffix(message, "\r")
 	if message == "" {
 		message = "(none)"
+	}
+
+	if c.Tag != "" {
+		_, err = fmt.Fprintf(stdout, "Tag: %s\n", c.Tag)
+		if err != nil {
+			return err
+		}
 	}
 
 	_, err = fmt.Fprintf(

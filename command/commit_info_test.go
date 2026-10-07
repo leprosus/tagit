@@ -49,14 +49,20 @@ func TestCommitOutputIsConsistent(t *testing.T) {
 			&stdout,
 			&stderr,
 		)
-		if code != 0 || stderr.Len() != 0 || stdout.String() != want {
+
+		expected := want
+		if args[0] == "history" {
+			expected = "Tag: v1.2.3\n" + want
+		}
+
+		if code != 0 || stderr.Len() != 0 || stdout.String() != expected {
 			t.Fatalf(
 				"args=%q code=%d stderr=%q got=%q want=%q",
 				args,
 				code,
 				stderr.String(),
 				stdout.String(),
-				want,
+				expected,
 			)
 		}
 	}
