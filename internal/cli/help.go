@@ -10,6 +10,7 @@ import (
 const HelpMessage = `Usage: tagit [patch|minor|major]
        tagit help [command]
        tagit ver
+       tagit history [vMAJOR.MINOR.PATCH]
        tagit changes [vMAJOR.MINOR.PATCH]
        tagit latest
        tagit show vMAJOR.MINOR.PATCH
@@ -62,11 +63,14 @@ func commandHelp(name string) (message string) {
 	}
 
 	messages := map[string]string{
+		"history": "Usage: tagit history [vMAJOR.MINOR.PATCH]\n\n" +
+			"Shows full commit hashes, authors, committer dates, and full messages, newest first.\n" +
+			"Uses the same range as changes: the specified tag, greatest version tag, or all HEAD history.\n",
 		"changes": "Usage: tagit changes [vMAJOR.MINOR.PATCH]\n\n" +
 			"Lists commits after the specified local tag up to HEAD, newest first.\n" +
 			"Defaults to the greatest local version tag, or all HEAD history if none exist.\n",
 		"show": "Usage: tagit show vMAJOR.MINOR.PATCH\n\n" +
-			"Shows the local tag's commit, commit date, and annotated tag message when present.\n",
+			"Shows the local tag's commit, author, commit date, and annotated tag message when present.\n",
 		"latest": "Usage: tagit latest\n\nPrints the greatest local version tag. Exits with status 1 if none exist.\n",
 		"list": "Usage: tagit list [limit]\n\n" +
 			"Lists version tags from oldest to newest. The optional limit must be a positive integer.\n",

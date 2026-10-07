@@ -5,7 +5,6 @@ import (
 	"io"
 
 	"github.com/leprosus/tagit/internal/git"
-	"github.com/leprosus/tagit/internal/version"
 )
 
 func Changes(
@@ -14,33 +13,11 @@ func Changes(
 	argumentList []string,
 	stdout io.Writer,
 ) (err error) {
-	if len(argumentList) > 1 {
-		return NewUsageError()
-	}
+	var tag string
 
-	tag := ""
-
-	if len(argumentList) == 1 {
-		_, valid := version.Parse(argumentList[0])
-		if !valid {
-			return NewUsageError()
-		}
-
-		tag = argumentList[0]
-	} else {
-		var (
-			latest version.Version
-			found  bool
-		)
-
-		latest, found, err = curGit.GetLatestVersion(ctx)
-		if err != nil {
-			return err
-		}
-
-		if found {
-			tag = latest.String()
-		}
+	tag, err = historyTag(ctx, curGit, argumentList)
+	if err != nil {
+		return err
 	}
 
 	var output string

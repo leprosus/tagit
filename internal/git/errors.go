@@ -56,3 +56,13 @@ func NewTagNotFoundError(tag string) (result *TagNotFoundError) {
 func (e *TagNotFoundError) Error() (result string) {
 	return fmt.Sprintf("local tag %q not found", e.Tag)
 }
+
+type InvalidHistoryOutputError struct{}
+
+func NewInvalidHistoryOutputError() (result *InvalidHistoryOutputError) {
+	return &InvalidHistoryOutputError{}
+}
+
+func (*InvalidHistoryOutputError) Error() (result string) {
+	return "invalid Git history output"
+}

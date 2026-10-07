@@ -67,35 +67,30 @@ func dispatchCommand(
 ) (err error) {
 	commandName, arg := argumentList[0], argumentList[1:]
 
+	handlers := map[string]func(
+		context.Context,
+		git.Git,
+		[]string,
+		io.Writer,
+	) error{
+		"history": command.History,
+		"changes": command.Changes,
+		"show":    command.Show,
+		"latest":  command.Latest,
+		"list":    command.List,
+	}
+
+	handler, found := handlers[commandName]
+	if found {
+		return handler(
+			ctx,
+			curGit,
+			arg,
+			stdout,
+		)
+	}
+
 	switch commandName {
-	case "changes":
-		return command.Changes(
-			ctx,
-			curGit,
-			arg,
-			stdout,
-		)
-	case "show":
-		return command.Show(
-			ctx,
-			curGit,
-			arg,
-			stdout,
-		)
-	case "latest":
-		return command.Latest(
-			ctx,
-			curGit,
-			arg,
-			stdout,
-		)
-	case "list":
-		return command.List(
-			ctx,
-			curGit,
-			arg,
-			stdout,
-		)
 	case "set":
 		return setTag(
 			ctx,

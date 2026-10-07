@@ -7,6 +7,7 @@ import (
 
 type TagInfo struct {
 	Commit     string
+	Author     string
 	CommitDate string
 	Message    string
 }
@@ -37,13 +38,15 @@ func (g Git) GetTagInfo(ctx context.Context, tag string) (info TagInfo, err erro
 
 	info.Commit = strings.TrimSpace(info.Commit)
 
-	info.CommitDate, err = g.RunCommand(
+	var metadata string
+
+	metadata, err = g.RunCommand(
 		ctx,
 		"show",
 		"--no-patch",
 		"--no-notes",
 		"--no-show-signature",
-		"--format=%cI",
+		"--format=%an <%ae>%x00%cI",
 		info.Commit,
 		"--",
 	)
@@ -51,7 +54,7 @@ func (g Git) GetTagInfo(ctx context.Context, tag string) (info TagInfo, err erro
 		return info, err
 	}
 
-	info.CommitDate = strings.TrimSpace(info.CommitDate)
+	info.Author, info.CommitDate, _ = strings.Cut(strings.TrimRight(metadata, "\n"), "\x00")
 
 	var objectType string
 

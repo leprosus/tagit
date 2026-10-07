@@ -86,7 +86,7 @@ func assertShow(t *testing.T, annotated bool) {
 
 	output := stdout.String()
 
-	prefix := "Tag: v1.2.3\nCommit: " + strings.TrimSpace(commit) + "\nDate: "
+	prefix := "Tag: v1.2.3\nCommit: " + strings.TrimSpace(commit) + "\nAuthor: Test User <test@example.com>\nDate: "
 	if !strings.HasPrefix(output, prefix) || !strings.HasSuffix(output, message) {
 		t.Fatalf("unexpected output: %q", output)
 	}
@@ -165,5 +165,43 @@ func TestShowInvalidArguments(t *testing.T) {
 				stdout.String(),
 			)
 		}
+	}
+}
+
+func TestShowUsesCommitAuthor(t *testing.T) {
+	t.Parallel()
+	directory := command.Repository(t)
+	historyCommit(
+		t,
+		directory,
+		"Commit message",
+		"2026-10-07T15:42:10+02:00",
+	)
+	command.RunGit(
+		t,
+		directory,
+		"tag",
+		"-a",
+		"v1.2.3",
+		"-m",
+		"Tag message",
+	)
+
+	var stdout bytes.Buffer
+
+	err := command.Show(
+		t.Context(),
+		git.New(directory),
+		[]string{"v1.2.3"},
+		&stdout,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	output := stdout.String()
+	if !strings.Contains(output, "Author: Alice <alice@example.com>\nDate: 2026-10-07T15:42:10+02:00\n") ||
+		!strings.HasSuffix(output, "Message:\nTag message\n") {
+		t.Fatalf("output=%q", output)
 	}
 }

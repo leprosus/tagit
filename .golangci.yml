@@ -22,6 +22,7 @@ linters:
     - wsl
     - exhaustruct_v5
     - goconst
+    - whitespace
   settings:
     cyclop:
       max-complexity: 10

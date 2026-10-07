@@ -38,9 +38,10 @@ func Show(
 
 	_, err = fmt.Fprintf(
 		stdout,
-		"Tag: %s\nCommit: %s\nDate: %s\n%s\n",
+		"Tag: %s\nCommit: %s\nAuthor: %s\nDate: %s\n%s\n",
 		argumentList[0],
 		info.Commit,
+		info.Author,
 		info.CommitDate,
 		message,
 	)

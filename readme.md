@@ -34,6 +34,8 @@ Run it from a Git repository:
 ```sh
 tagit                 # no semantic tags yet: creates v0.0.1; otherwise increments patch
 tagit ver             # prints the executable's release version, or dev for local builds
+tagit history         # shows detailed history since the greatest local version tag
+tagit history v1.2.3  # shows detailed history since the specified local tag
 tagit changes         # lists commits since the greatest local version tag
 tagit changes v1.2.3  # lists commits since the specified local tag
 tagit latest          # prints the greatest local version tag
@@ -52,7 +54,7 @@ tagit del-all v1.2.3  # deletes the tag from all remotes, then locally
 
 Commands use positional arguments. Ctrl+C cancels active Git subprocesses.
 
-`tagit show v1.2.3` prints the tag name, full commit hash, committer date in
+`tagit show v1.2.3` prints the tag name, full commit hash, commit author (name and email), committer date in
 ISO 8601 format, and the annotated tag message. Lightweight tags display
 `Message: (none)`. The date belongs to the commit, not the tag creation time.
 The command reads only local tags and does not modify the repository. A missing
@@ -98,3 +100,30 @@ Each line contains a short commit hash and the first line of its message, newest
 first (Git date order). An empty range produces no output and succeeds. Invalid
 arguments, a missing explicit tag, or a Git error produce exit status 1.
 The command only reads the local repository.
+
+`tagit history [vMAJOR.MINOR.PATCH]` selects the same range as `changes`, but
+prints a separate block for each commit: full hash, author name and email,
+committer date in ISO 8601, and the full commit message. Blocks are separated
+by a blank line. Lightweight and annotated tags select the same commit range;
+tag annotations are not commit messages. Empty ranges succeed without output.
+
+Example output:
+
+```text
+Commit: 9f8e7d6c5b4a32100123456789abcdef01234567
+Author: Ivan Petrov <ivan@example.com>
+Date: 2026-10-07T15:42:10+02:00
+Message:
+Add changes command
+
+Use the greatest local SemVer tag when no version is supplied.
+
+Commit: 123456789abcdef0123456789abcdef012345678
+Author: Ivan Petrov <ivan@example.com>
+Date: 2026-10-07T14:18:03+02:00
+Message:
+Fix tag validation
+```
+
+`show` also displays the commit author; its `Message` remains the annotated
+tag's message, or `(none)` for a lightweight tag.
