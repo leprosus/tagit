@@ -78,28 +78,3 @@ func TestVersionGetNextVersion(t *testing.T) {
 		t.Fatalf("overflow error = %v", err)
 	}
 }
-
-func TestGetLatestVersion(t *testing.T) {
-	t.Parallel()
-
-	got, ok := Latest([]string{"v0.0.9", "v1.0.0", "v0.1.0", "release", "v01.0.0"})
-	if !ok || got != (Version{major: 1}) {
-		t.Fatalf("Latest returned (%v, %t)", got, ok)
-	}
-
-	var isLatestVersion bool
-
-	_, isLatestVersion = Latest([]string{"release", "v1.0"})
-	if isLatestVersion {
-		t.Fatal("Latest accepted invalid tags")
-	}
-}
-
-func TestGetLatestVersionAcceptsZeroVersion(t *testing.T) {
-	t.Parallel()
-
-	got, found := Latest([]string{"release", "v0.0.0", "v01.0.0"})
-	if !found || got != (Version{}) {
-		t.Fatalf("Latest returned (%v, %t), want (v0.0.0, true)", got, found)
-	}
-}

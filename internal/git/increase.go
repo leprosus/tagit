@@ -14,7 +14,7 @@ func (g Git) IncreaseTag(ctx context.Context, incrementKind version.Kind) (tag s
 		return tag, err
 	}
 
-	current, found := version.Latest(tagList)
+	current, found := version.ParseList(tagList).Latest()
 	if !found {
 		current = version.Version{}
 

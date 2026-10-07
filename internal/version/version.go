@@ -114,25 +114,6 @@ func (v Version) Next(incrementKind Kind) (result Version, err error) {
 	return result, nil
 }
 
-func Latest(tagList []string) (latest Version, found bool) {
-	var (
-		current Version
-		isValid bool
-	)
-
-	for _, tag := range tagList {
-		current, isValid = Parse(tag)
-		if !isValid || (found && current.Compare(latest) <= 0) {
-			continue
-		}
-
-		latest = current
-		found = true
-	}
-
-	return latest, found
-}
-
 type UnknownVersionIncrementError struct {
 	Kind string
 }

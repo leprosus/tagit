@@ -14,7 +14,7 @@ func (g Git) GetLatestVersion(ctx context.Context) (latest version.Version, foun
 		return latest, false, err
 	}
 
-	latest, found = version.Latest(tagList)
+	latest, found = version.ParseList(tagList).Latest()
 
 	return latest, found, nil
 }

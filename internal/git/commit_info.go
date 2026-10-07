@@ -35,7 +35,7 @@ func (c CommitInfo) Write(stdout io.Writer) (err error) {
 	return err
 }
 
-func (cl CommitInfoList) WriteCommitList(stdout io.Writer) (err error) {
+func (cl CommitInfoList) Write(stdout io.Writer) (err error) {
 	for i, commit := range cl {
 		if i > 0 {
 			_, err = io.WriteString(stdout, "\n")
