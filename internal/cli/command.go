@@ -68,6 +68,13 @@ func dispatchCommand(
 	commandName, arg := argumentList[0], argumentList[1:]
 
 	switch commandName {
+	case "changes":
+		return command.Changes(
+			ctx,
+			curGit,
+			arg,
+			stdout,
+		)
 	case "show":
 		return command.Show(
 			ctx,

@@ -37,7 +37,7 @@ func TestCommandHelpWithoutGit(t *testing.T) {
 	t.Setenv("PATH", t.TempDir())
 
 	for _, commandName := range []string{
-		"patch", "minor", "major", "list", "latest", "show", "set", "del", "del-all", "ver",
+		"patch", "minor", "major", "list", "latest", "show", "changes", "set", "del", "del-all", "ver",
 	} {
 		for _, arguments := range [][]string{{"help", commandName}, {commandName, "-h"}, {commandName, "--help"}} {
 			var stdout, stderr bytes.Buffer

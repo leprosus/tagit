@@ -34,6 +34,8 @@ Run it from a Git repository:
 ```sh
 tagit                 # no semantic tags yet: creates v0.0.1; otherwise increments patch
 tagit ver             # prints the executable's release version, or dev for local builds
+tagit changes         # lists commits since the greatest local version tag
+tagit changes v1.2.3  # lists commits since the specified local tag
 tagit latest          # prints the greatest local version tag
 tagit show v1.2.3     # shows the local tag's commit, commit date, and tag message
 tagit --help          # shows help successfully, from any directory
@@ -85,3 +87,14 @@ failures on standard error, and exits with status `1`. The local tag is retained
 successful remote deletions are not rolled back. Run the command again after
 resolving the failure to complete deletion. If a remote has separate fetch and
 push URLs, only its push destinations are modified.
+
+`tagit changes [vMAJOR.MINOR.PATCH]` lists commits reachable from `HEAD` but
+not from the selected local tag, excluding the tagged commit itself. Without an
+argument it selects the greatest local SemVer tag, as `tagit latest` does; if
+none exist it lists the entire history reachable from `HEAD`. The selected tag
+may be on another branch: the same reachability rule applies.
+
+Each line contains a short commit hash and the first line of its message, newest
+first (Git date order). An empty range produces no output and succeeds. Invalid
+arguments, a missing explicit tag, or a Git error produce exit status 1.
+The command only reads the local repository.
